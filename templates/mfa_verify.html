@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartSeg - MFA Verification</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  
+  <style>
+    :root {
+      --brand-blue: #2563EB;
+      --gradient-bg: linear-gradient(135deg, #2563eb 0%, #1d4ed8 50%, #1e1b4b 100%);
+      --text-dark: #0f172a;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+    }
+    * { 
+        box-sizing: border-box; 
+        margin: 0; 
+        padding: 0; 
+        font-family: system-ui, -apple-system, sans-serif; 
+    }
+    body { 
+        background-color: #ffffff; 
+        min-height: 100vh; 
+        display: flex; 
+    }
+    .auth-container { 
+        display: flex; 
+        width: 100vw; 
+        min-height: 100vh; 
+    }
+    .brand-panel { 
+        flex: 1; 
+        background: var(--gradient-bg); 
+        color: #fff; 
+        padding: 60px; 
+        display: flex; 
+        flex-direction: column; 
+        justify-content: space-between; 
+    }
+    .brand-hero-content { 
+        max-width: 480px; 
+        margin: auto 0; 
+    }
+    .brand-icon-badge { 
+        width: 64px; 
+        height: 64px; 
+        background: rgba(255, 255, 255, 0.2); 
+        border-radius: 16px; 
+        display: grid; 
+        place-items: center; 
+        font-size: 2rem; 
+        margin-bottom: 32px; 
+    }
+    .brand-hero-content h1 { 
+        font-size: 3rem; 
+        font-weight: 800; 
+        line-height: 1.15; 
+        margin-bottom: 20px; 
+    }
+
+    .form-panel { 
+        width: 520px; 
+        padding: 60px; 
+        display: flex; 
+        flex-direction: column; 
+        justify-content: center; 
+    }
+    .brand-logo-text { 
+        font-size: 1.5rem; 
+        font-weight: 800; 
+        color: var(--text-dark); 
+        text-decoration: none; 
+        margin-bottom: 40px; 
+    }
+    .form-header h2 { 
+        font-size: 1.85rem; 
+        font-weight: 800; 
+        color: var(--text-dark); 
+        margin-bottom: 8px; 
+    }
+    .subtext { 
+        font-size: 0.9rem; 
+        color: var(--text-muted); 
+        margin-bottom: 24px; 
+    }
+
+    /* MFA Code Box Input */
+    .mfa-inputs { 
+        display: flex; 
+        gap: 10px; 
+        margin-bottom: 24px; 
+        justify-content: center; 
+    }
+    .mfa-input { 
+        width: 48px; 
+        height: 56px; 
+        font-size: 1.5rem; 
+        font-weight: 700; 
+        text-align: center; 
+        border: 1px solid var(--border-color); 
+        border-radius: 8px; 
+        background: #f8fafc; 
+        outline: none; 
+    }
+    .mfa-input:focus { 
+        border-color: var(--brand-blue); 
+        background: #fff; 
+    }
+
+    .btn-submit { 
+        width: 100%; 
+        padding: 12px; 
+        background: #111827; 
+        color: #fff; 
+        border: none; 
+        border-radius: 8px; 
+        font-size: 1rem; 
+        font-weight: 600; 
+        cursor: pointer; 
+    }
+    .resend-text { 
+        font-size: 0.85rem; 
+        color: var(--text-muted); 
+        text-align: center; 
+        margin-top: 20px; 
+    }
+    .resend-text a { 
+        color: var(--brand-blue); 
+        font-weight: 600; 
+        text-decoration: none; 
+    }
+
+    @media (max-width: 900px) { 
+        .brand-panel { 
+        display: none; 
+    } 
+    .form-panel {
+        width: 100vw; 
+        padding: 32px 20px; 
+    } 
+}
+  </style>
+</head>
+<body>
+
+  <div class="auth-container">
+    <div class="brand-panel">
+      <div class="brand-hero-content">
+        <div class="brand-icon-badge"><i class="fa-solid fa-shield-halved"></i></div>
+        <h1>Two-Factor Check 🛡️</h1>
+        <p>Your security is our top priority. Enter the verification code sent to your authenticator app or email.</p>
+      </div>
+      <div>&copy; 2026 SmartSeg. All rights reserved.</div>
+    </div>
+
+    <div class="form-panel">
+      <a href="{{ url_for('home') }}" class="brand-logo-text"><i class="fa-solid fa-layer-group"></i> SmartSeg</a>
+
+      <div class="form-header">
+        <h2>Enter Security Code</h2>
+        <p class="subtext">We sent a 6-digit verification code to your registered device.</p>
+      </div>
+
+      <form action="{{ url_for('auth.mfa_verify') }}" method="POST">
+        <div class="mfa-inputs">
+          <input type="text" maxlength="1" class="mfa-input" required autofocus>
+          <input type="text" maxlength="1" class="mfa-input" required>
+          <input type="text" maxlength="1" class="mfa-input" required>
+          <input type="text" maxlength="1" class="mfa-input" required>
+          <input type="text" maxlength="1" class="mfa-input" required>
+          <input type="text" maxlength="1" class="mfa-input" required>
+        </div>
+
+        <button type="submit" class="btn-submit">Verify & Login</button>
+      </form>
+
+      <p class="resend-text">Didn't get a code? <a href="#">Resend Code</a></p>
+    </div>
+  </div>
+
+  <script>
+    // Auto-advance cursor to next digit input box
+    const inputs = document.querySelectorAll('.mfa-input');
+    inputs.forEach((input, index) => {
+      input.addEventListener('keyup', (e) => {
+        if (e.key >= 0 && e.key <= 9) {
+          if (index < inputs.length - 1) inputs[index + 1].focus();
+        } else if (e.key === 'Backspace') {
+          if (index > 0) inputs[index - 1].focus();
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>

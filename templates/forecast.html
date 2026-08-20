@@ -1,0 +1,50 @@
+{% extends "dashboard_base.html" %}
+
+{% block page_title %}Forecast{% endblock %}
+{% block header_title %}Churn Risk & Revenue Forecast{% endblock %}
+{% block header_subtitle %}Segment-level projections based on current data{% endblock %}
+
+{% block content %}
+<div class="grid-2">
+  <div class="panel">
+    <h3 class="panel-title">Customers At Risk of Churning</h3>
+    {% if at_risk_customers %}
+    <ul class="info-list">
+      {% for c in at_risk_customers %}
+      <li>
+        <span>Customer #{{ c.customer_id }} <span class="segment-badge atrisk">{{ c.segment_name }}</span></span>
+        <strong>{{ c.recency }}d vs {{ c.baseline }}d avg</strong>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p style="color:#6B7280;">No at-risk customers flagged yet.</p>
+    {% endif %}
+  </div>
+
+  <div class="panel">
+    <h3 class="panel-title">Projected Segment Revenue</h3>
+    <div id="revenueChart"></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script id="projection-data" type="application/json">{{ projections | tojson }}</script>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script>
+  const projections = JSON.parse(document.getElementById('projection-data').textContent);
+  if (projections.length === 0) {
+    document.getElementById('revenueChart').innerHTML =
+      '<p style="color:#6B7280; text-align:center; padding: 60px 0;">No segment data yet to project revenue from.</p>';
+  } else {
+    const revenueData = [
+      { x: projections.map(p => p.segment_name), y: projections.map(p => p.current_total), name: 'Current', type: 'bar', marker: { color: '#4F7CFF' } },
+      { x: projections.map(p => p.segment_name), y: projections.map(p => p.projected_next_period), name: 'Projected', type: 'bar', marker: { color: '#E8A94C' } }
+    ];
+    Plotly.newPlot('revenueChart', revenueData, {
+      barmode: 'group', height: 320, margin: { t: 10 }, font: { family: 'Inter, sans-serif' }
+    }, { displayModeBar: false });
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "dashboard_base.html" %}
+
+{% block page_title %}Add Customer{% endblock %}
+{% block header_title %}Add New Customer{% endblock %}
+{% block header_subtitle %}Register a customer's demographic details{% endblock %}
+
+{% block content %}
+<div class="panel" style="max-width: 560px;">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert-note {{ 'error' if category == 'error' else 'success' }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <form method="POST">
+    <div class="field">
+      <label for="name">Full Name</label>
+      <input type="text" id="name" name="name" required>
+    </div>
+    <div class="field">
+      <label for="age">Age</label>
+      <input type="number" id="age" name="age" min="1">
+    </div>
+    <div class="field">
+      <label for="gender">Gender</label>
+      <select id="gender" name="gender">
+        <option value="">Select</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="phone">Phone</label>
+      <input type="text" id="phone" name="phone">
+    </div>
+    <div class="field">
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email">
+    </div>
+    <div class="field">
+      <label for="location">Location</label>
+      <input type="text" id="location" name="location" placeholder="City, State">
+    </div>
+    <div class="field">
+      <label for="occupation">Occupation</label>
+      <input type="text" id="occupation" name="occupation">
+    </div>
+    <button type="submit" class="btn btn-gold">Add Customer</button>
+  </form>
+</div>
+{% endblock %}

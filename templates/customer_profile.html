@@ -1,0 +1,83 @@
+{% extends "dashboard_base.html" %}
+{% block page_title %}Customer Profile{% endblock %}
+{% block header_title %}{{ customer.name }}{% endblock %}
+{% block header_subtitle %}Demographic overview and transaction timeline{% endblock %}
+
+{% block content %}
+<div class="dashboard-grid">
+  <!-- Customer Details Panel -->
+  <div class="panel glass-panel">
+    <div class="panel-header">
+      <h3 class="panel-title"><i class="fa-solid fa-id-card"></i> Profile Details</h3>
+      {% if segment %}
+        <span class="badge" style="background:#e0e7ff; color:#3730a3; padding:6px 12px; border-radius:6px; font-weight:600;">
+          {{ segment.segment_name }}
+        </span>
+      {% endif %}
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-top: 1rem;">
+      <div><strong>Email:</strong> <p>{{ customer.email or 'N/A' }}</p></div>
+      <div><strong>Phone:</strong> <p>{{ customer.phone or 'N/A' }}</p></div>
+      <div><strong>Age:</strong> <p>{{ customer.age or 'N/A' }}</p></div>
+      <div><strong>Gender:</strong> <p>{{ customer.gender or 'N/A' }}</p></div>
+      <div><strong>Location:</strong> <p>{{ customer.location or 'N/A' }}</p></div>
+      <div><strong>Occupation:</strong> <p>{{ customer.occupation or 'N/A' }}</p></div>
+    </div>
+
+    <hr style="margin: 1.5rem 0; border: none; border-top: 1px solid #e2e8f0;">
+
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <span style="color: #64748b; font-size: 0.875rem;">Total Lifetime Spend</span>
+        <h2 style="color: #2563eb; font-weight: 700;">${{ "%.2f"|format(total_spend) }}</h2>
+      </div>
+
+      {% if session.get('is_admin') and not customer.is_anonymized %}
+      <form method="POST" action="{{ url_for('customers.anonymize_customer', customer_id=customer.id) }}" onsubmit="return confirm('Anonymize this customer profile? This action cannot be undone.');">
+        <button type="submit" class="btn" style="background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">
+          <i class="fa-solid fa-user-slash"></i> Anonymize Customer
+        </button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Purchase History Panel -->
+  <div class="panel glass-panel">
+    <div class="panel-header">
+      <h3 class="panel-title"><i class="fa-solid fa-receipt"></i> Purchase History</h3>
+      <a href="{{ url_for('sales.add_sale', customer_id=customer.id) }}" class="btn-secondary" style="text-decoration:none;">
+        <i class="fa-solid fa-cart-plus"></i> Log New Sale
+      </a>
+    </div>
+
+    <table class="styled-table" style="width:100%; border-collapse: collapse; text-align: left; margin-top: 1rem;">
+      <thead>
+        <tr style="border-bottom: 2px solid #e2e8f0; color: #64748b;">
+          <th style="padding: 8px;">Date</th>
+          <th style="padding: 8px;">Item</th>
+          <th style="padding: 8px;">Qty</th>
+          <th style="padding: 8px;">Price</th>
+          <th style="padding: 8px;">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for sale in sales %}
+        <tr style="border-bottom: 1px solid #f1f5f9;">
+          <td style="padding: 8px;">{{ sale.sale_date.strftime('%Y-%m-%d') if sale.sale_date else 'N/A' }}</td>
+          <td style="padding: 8px;">{{ sale.item_name }}</td>
+          <td style="padding: 8px;">{{ sale.quantity }}</td>
+          <td style="padding: 8px;">${{ "%.2f"|format(sale.price) }}</td>
+          <td style="padding: 8px; font-weight: 600;">${{ "%.2f"|format(sale.price * sale.quantity) }}</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="5" style="padding: 16px; text-align: center; color: #94a3b8;">No transaction history found.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

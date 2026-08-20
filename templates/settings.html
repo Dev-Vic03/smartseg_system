@@ -1,0 +1,27 @@
+{% extends "dashboard_base.html" %}
+{% block page_title %}Settings{% endblock %}
+{% block header_title %}Workspace Settings{% endblock %}
+{% block header_subtitle %}Manage API credentials and system preferences{% endblock %}
+
+{% block content %}
+<div class="panel glass-panel">
+  <div class="panel-header">
+    <h3 class="panel-title"><i class="fa-solid fa-key"></i> System API Key</h3>
+  </div>
+  <div class="styled-form">
+    <div class="field">
+      <label>Active API Credentials Key</label>
+      <input type="text" class="form-control" id="apiKeyVal" value="{{ setting.api_key }}" readonly>
+    </div>
+    <button class="btn btn-accent" onclick="regenKey()"><i class="fa-solid fa-rotate"></i> Regenerate API Key</button>
+  </div>
+</div>
+
+<script>
+async function regenKey() {
+  const res = await fetch('/api/settings/generate-key', { method: 'POST' });
+  const data = await res.json();
+  document.getElementById('apiKeyVal').value = data.api_key;
+}
+</script>
+{% endblock %}

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartSeg - Register</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  
+  <style>
+    :root {
+      --brand-blue: #2563EB;
+      --gradient-bg: linear-gradient(135deg, #2563eb 0%, #1d4ed8 50%, #1e1b4b 100%);
+      --text-dark: #0f172a;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --input-bg: #f8fafc;
+    }
+
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      font-family: system-ui, -apple-system, sans-serif; 
+    }
+    body { 
+      background-color: #ffffff; 
+      min-height: 100vh; 
+      display: flex; 
+    }
+    .auth-container { 
+      display: flex; 
+      width: 100vw; 
+      min-height: 100vh; 
+    }
+
+    .brand-panel {
+      flex: 1; 
+      background: var(--gradient-bg); 
+      color: #ffffff; 
+      padding: 60px;
+      display: flex; 
+      flex-direction: column; 
+      justify-content: space-between; 
+      position: relative;
+    }
+
+    .brand-hero-content { 
+      position: relative; 
+      z-index: 2; 
+      max-width: 480px; 
+      margin: auto 0; 
+    }
+    .brand-icon-badge {
+      width: 64px; 
+      height: 64px; 
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 16px; 
+      display: grid; 
+      place-items: center; 
+      font-size: 2rem; 
+      margin-bottom: 32px;
+    }
+    .brand-hero-content h1 { 
+      font-size: 3.25rem; 
+      font-weight: 800; 
+      line-height: 1.15; 
+      margin-bottom: 20px; 
+    }
+    .brand-hero-content p { 
+      font-size: 1.1rem; 
+      color: rgba(255, 255, 255, 0.85); 
+      line-height: 1.6; 
+    }
+
+    .form-panel {
+       width: 520px; 
+       padding: 50px 60px; 
+       display: flex; 
+       flex-direction: column; 
+       justify-content: center; 
+       background: #ffffff; 
+      }
+    .brand-logo-text { 
+      font-size: 1.5rem; 
+      font-weight: 800; 
+      color: var(--text-dark); 
+      text-decoration: none; 
+      display: flex; 
+      align-items: center; 
+      gap: 10px; 
+      margin-bottom: 30px; 
+    }
+    .form-header h2 { 
+      font-size: 1.85rem; 
+      font-weight: 800; 
+      color: var(--text-dark); 
+      margin-bottom: 8px; 
+    }
+    .subtext { 
+      font-size: 0.9rem; 
+      color: var(--text-muted); 
+      margin-bottom: 24px; 
+    }
+    .subtext a { 
+      color: var(--brand-blue); 
+      text-decoration: underline; 
+      font-weight: 600; 
+    }
+
+    .form-group { 
+      margin-bottom: 16px; 
+    }
+    .form-group label { 
+      display: block; 
+      font-size: 0.875rem; 
+      font-weight: 600; 
+      margin-bottom: 6px; 
+    }
+    .form-control { 
+      width: 100%; 
+      padding: 12px 16px; 
+      border: 1px solid var(--border-color); 
+      border-radius: 8px; 
+      font-size: 0.95rem; 
+      background: var(--input-bg); 
+      outline: none; 
+    }
+    .form-control:focus { 
+      border-color: var(--brand-blue); 
+      background: #fff; 
+    }
+
+    .btn-submit { 
+      width: 100%; 
+      padding: 12px; 
+      background: #111827; 
+      color: #fff; 
+      border: none; 
+      border-radius: 8px; 
+      font-size: 1rem; 
+      font-weight: 600; 
+      cursor: pointer; 
+    }
+    .btn-sso { 
+      width: 100%; 
+      padding: 12px; 
+      background: #fff; 
+      border: 1px solid var(--border-color); 
+      border-radius: 8px; 
+      font-size: 0.95rem; 
+      font-weight: 600; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      gap: 10px; 
+      text-decoration: none; 
+      color: var(--text-dark); 
+    }
+    .divider { 
+      display: flex; 
+      align-items: center; 
+      margin: 20px 0; 
+      color: var(--text-muted); 
+      font-size: 0.8rem; 
+    }
+    .divider::before, .divider::after { 
+      content: ''; 
+      flex: 1; 
+      border-bottom: 1px solid var(--border-color); 
+    }
+    .divider span { 
+      padding: 0 12px; 
+    }
+
+    @media (max-width: 900px) { 
+      .brand-panel { 
+        display: none; 
+      } 
+      .form-panel { 
+        width: 100vw; 
+        padding: 32px 20px; 
+      } 
+    }
+  </style>
+</head>
+<body>
+
+  <div class="auth-container">
+    <div class="brand-panel">
+      <div class="brand-hero-content">
+        <div class="brand-icon-badge"><i class="fa-solid fa-user-plus"></i></div>
+        <h1>Join SmartSeg! </h1>
+        <p>Unlock AI-driven customer intelligence, automatic RFM scoring, and instant retention workflows for your business.</p>
+      </div>
+      <div class="brand-footer">&copy; 2026 SmartSeg. All rights reserved.</div>
+    </div>
+
+    <div class="form-panel">
+      <a href="{{ url_for('home') }}" class="brand-logo-text"><i class="fa-solid fa-layer-group text-primary"></i> SmartSeg</a>
+
+      <div class="form-header">
+        <h2>Get Started Free</h2>
+        <p class="subtext">Already have an account? <a href="{{ url_for('auth.login') }}">Log in here</a></p>
+      </div>
+
+      <form action="{{ url_for('auth.register') }}" method="POST">
+        <div class="form-group">
+          <label for="fullname">Full Name</label>
+          <input type="text" id="fullname" name="fullname" class="form-control" placeholder="John Doe" required>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Business Email</label>
+          <input type="email" id="email" name="email" class="form-control" placeholder="name@company.com" required>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" class="form-control" placeholder="Minimum 8 characters" required>
+        </div>
+
+        <div class="form-group" style="display:flex; gap:8px; align-items:center; margin-bottom:20px;">
+          <input type="checkbox" id="terms" required>
+          <label for="terms" style="font-weight: normal; font-size: 0.85rem; color: var(--text-muted); margin: 0;">
+            I agree to the <a href="{{ url_for('terms') }}" style="color:var(--brand-blue)">Terms & Conditions</a>
+          </label>
+        </div>
+
+        <button type="submit" class="btn-submit">Create Free Account</button>
+      </form>
+
+  </div>
+
+</body>
+</html>

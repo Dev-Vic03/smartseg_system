@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartSeg - {% block page_title %}Dashboard{% endblock %}</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+  
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-icon"><i class="fa-solid fa-layer-group"></i></div>
+        <span class="brand-name">SmartSeg</span>
+      </div>
+
+      <div class="nav-section-label">Main</div>
+      <a href="{{ url_for('dashboard') }}" class="nav-item {% if request.path == url_for('dashboard') %}active{% endif %}">
+        <i class="fa-solid fa-gauge-high"></i> Dashboard
+      </a>
+      <a href="{{ url_for('customers.index') }}" class="nav-item {% if '/customers' in request.path %}active{% endif %}">
+        <i class="fa-solid fa-users"></i> Customers
+      </a>
+      <a href="{{ url_for('campaigns.index') }}" class="nav-item {% if '/campaigns' in request.path %}active{% endif %}">
+        <i class="fa-solid fa-paper-plane"></i> Campaigns
+      </a>
+      <a href="{{ url_for('forecast') }}" class="nav-item {% if request.path == url_for('forecast') %}active{% endif %}">
+        <i class="fa-solid fa-chart-line"></i> Forecast
+      </a>
+      <a href="{{ url_for('reports.index') }}" class="nav-item {% if '/reports' in request.path %}active{% endif %}">
+        <i class="fa-solid fa-file-invoice"></i> Reports
+      </a>
+
+      <div class="nav-section-label">System</div>
+      <a href="{{ url_for('settings.index') }}" class="nav-item {% if '/settings' in request.path %}active{% endif %}">
+        <i class="fa-solid fa-gear"></i> Settings
+      </a>
+      <a href="{{ url_for('terms') }}" class="nav-item {% if request.path == url_for('terms') %}active{% endif %}">
+        <i class="fa-solid fa-file-shield"></i> Terms &amp; Privacy
+      </a>
+
+      <div class="sidebar-footer">
+        <a href="{{ url_for('auth.logout') }}" class="nav-item">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+        </a>
+      </div>
+    </aside>
+
+    <div class="main-area">
+      <header class="topbar">
+        <div>
+          <div class="topbar-title">{% block header_title %}Dashboard{% endblock %}</div>
+          <div class="topbar-subtitle">{% block header_subtitle %}{% endblock %}</div>
+        </div>
+        <div class="topbar-user">
+          <div class="avatar">{{ session.get('user_name', 'U')[0] | upper }}</div>
+        </div>
+      </header>
+
+      <main class="content">
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+  </div>
+
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

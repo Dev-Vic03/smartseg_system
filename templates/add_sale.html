@@ -1,0 +1,42 @@
+{% extends "dashboard_base.html" %}
+{% block page_title %}Log Transaction{% endblock %}
+{% block header_title %}Sales Transaction Logger{% endblock %}
+{% block header_subtitle %}Record customer purchases to automatically update RFM metrics{% endblock %}
+
+{% block content %}
+<div class="panel glass-panel" style="max-width: 560px; margin: 0 auto;">
+  <form method="POST" action="{{ url_for('sales.add_sale') }}" class="styled-form">
+    <div class="field" style="margin-bottom: 1rem;">
+      <label for="customer_id">Select Customer</label>
+      <select id="customer_id" name="customer_id" class="form-control" required>
+        <option value="">-- Choose Customer --</option>
+        {% for c in customers %}
+        <option value="{{ c.id }}" {% if selected_customer_id == c.id %}selected{% endif %}>
+          #{{ c.id }} - {{ c.name }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="field" style="margin-bottom: 1rem;">
+      <label for="item_name">Item / Product Name</label>
+      <input type="text" id="item_name" name="item_name" class="form-control" placeholder="e.g. Enterprise License Subscription" required>
+    </div>
+
+    <div class="form-row" style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+      <div class="field" style="flex:1;">
+        <label for="quantity">Quantity</label>
+        <input type="number" id="quantity" name="quantity" class="form-control" value="1" min="1" required>
+      </div>
+      <div class="field" style="flex:1;">
+        <label for="price">Unit Price ($)</label>
+        <input type="number" step="0.01" id="price" name="price" class="form-control" placeholder="99.99" required>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-block" style="width: 100%;">
+      <i class="fa-solid fa-cart-shopping"></i> Complete Transaction
+    </button>
+  </form>
+</div>
+{% endblock %}

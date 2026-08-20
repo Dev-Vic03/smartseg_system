@@ -1,0 +1,384 @@
+{% extends "dashboard_base.html" %}
+
+{% block page_title %}Dashboard{% endblock %}
+{% block header_title %}Welcome back, {{ session.get('user_name', 'there') }}{% endblock %}
+{% block header_subtitle %}Real-time customer segmentation metrics and classification engine{% endblock %}
+
+{% block content %}
+
+<!-- SweetAlert2 Library -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- KPI Metrics Grid -->
+<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+  <div class="panel glass-panel" style="padding: 1.25rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+      <span style="color: #64748b; font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">VIP Customers</span>
+      <div style="background: #e0e7ff; color: #4338ca; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+        <i class="fa-solid fa-crown"></i>
+      </div>
+    </div>
+    <div class="kpi-value" style="font-size: 1.75rem; font-weight: 700; color: #1e293b;">{{ stats.vip }}</div>
+    <div style="font-size: 0.75rem; color: #4338ca; margin-top: 0.25rem;">High Value Tier</div>
+  </div>
+
+  <div class="panel glass-panel" style="padding: 1.25rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+      <span style="color: #64748b; font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">Loyal Customers</span>
+      <div style="background: #dbeafe; color: #1d4ed8; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+        <i class="fa-solid fa-heart"></i>
+      </div>
+    </div>
+    <div class="kpi-value" style="font-size: 1.75rem; font-weight: 700; color: #1e293b;">{{ stats.loyal }}</div>
+    <div style="font-size: 0.75rem; color: #1d4ed8; margin-top: 0.25rem;">Consistent Buyers</div>
+  </div>
+
+  <div class="panel glass-panel" style="padding: 1.25rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+      <span style="color: #64748b; font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">Regular Customers</span>
+      <div style="background: #f1f5f9; color: #475569; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+        <i class="fa-solid fa-user"></i>
+      </div>
+    </div>
+    <div class="kpi-value" style="font-size: 1.75rem; font-weight: 700; color: #1e293b;">{{ stats.regular }}</div>
+    <div style="font-size: 0.75rem; color: #475569; margin-top: 0.25rem;">Standard Engagement</div>
+  </div>
+
+  <div class="panel glass-panel" style="padding: 1.25rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+      <span style="color: #64748b; font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">At-Risk Customers</span>
+      <div style="background: #fef2f2; color: #dc2626; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+    </div>
+    <div class="kpi-value" style="font-size: 1.75rem; font-weight: 700; color: #1e293b;">{{ stats.at_risk }}</div>
+    <div style="font-size: 0.75rem; color: #dc2626; margin-top: 0.25rem;">Action Needed</div>
+  </div>
+</div>
+
+<!-- Tools Section -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; align-items: stretch;">
+  <!-- Single Inference Panel -->
+  <div class="panel glass-panel" style="display: flex; flex-direction: column; justify-content: space-between;">
+    <div>
+      <div class="panel-header" style="margin-bottom: 1rem;">
+        <div>
+          <h3 class="panel-title" style="font-size: 1.1rem; font-weight: 600;"><i class="fa-solid fa-wand-magic-sparkles"></i> Single Customer Classifier</h3>
+          <p class="panel-subtitle" style="font-size: 0.85rem; color: #64748b;">Input RFM metrics to infer segment</p>
+        </div>
+      </div>
+
+      <form id="predictionForm" class="styled-form">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+          <div class="field">
+            <label for="customerId" style="font-size: 0.8rem; font-weight: 600;">Customer ID <span style="font-weight: 400; color:#94a3b8;">(Opt)</span></label>
+            <input type="number" id="customerId" class="form-control" placeholder="e.g. 1024">
+          </div>
+          <div class="field">
+            <label for="recency" style="font-size: 0.8rem; font-weight: 600;">Recency <span style="font-weight: 400; color:#94a3b8;">(Days)</span></label>
+            <input type="number" step="any" id="recency" class="form-control" placeholder="e.g. 12" required>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
+          <div class="field">
+            <label for="frequency" style="font-size: 0.8rem; font-weight: 600;">Frequency <span style="font-weight: 400; color:#94a3b8;">(Orders)</span></label>
+            <input type="number" step="any" id="frequency" class="form-control" placeholder="e.g. 34" required>
+          </div>
+          <div class="field">
+            <label for="monetary" style="font-size: 0.8rem; font-weight: 600;">Monetary <span style="font-weight: 400; color:#94a3b8;">($ Spend)</span></label>
+            <input type="number" step="any" id="monetary" class="form-control" placeholder="e.g. 1250" required>
+          </div>
+        </div>
+
+        <button type="submit" id="btnClassify" class="btn btn-primary" style="width: 100%;">
+          <i class="fa-solid fa-bolt"></i> Classify Customer
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- CSV Upload & Export Actions -->
+  <div class="panel glass-panel" style="display: flex; flex-direction: column; justify-content: space-between;">
+    <div>
+      <div class="panel-header" style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h3 class="panel-title" style="font-size: 1.1rem; font-weight: 600;"><i class="fa-solid fa-file-csv"></i> Dataset Manager</h3>
+          <p class="panel-subtitle" style="font-size: 0.85rem; color: #64748b;">Upload batch dataset or export active records</p>
+        </div>
+        <a href="/api/export_all_csv" class="btn-pill-download">
+          <i class="fa-solid fa-file-export" style="color: #2563eb;"></i> Export CSV
+        </a>
+      </div>
+      <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 1rem;">Select a valid .csv file containing customer details (Name, Recency, Frequency, Monetary) to calculate batch classifications in real-time.</p>
+    </div>
+
+    <form id="csvUploadForm" class="styled-form" method="POST" enctype="multipart/form-data" style="margin-top: auto;">
+      <div class="file-upload-wrapper" style="margin-bottom: 1rem;">
+        <input type="file" id="csvFile" name="file" accept=".csv" class="form-control" required>
+      </div>
+      <button type="submit" id="btnUpload" class="btn btn-primary" style="width: 100%;">
+        <i class="fa-solid fa-gears"></i> Process Dataset Batch
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- Main Interactive Visual Panels -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+  <!-- Chart Panel 1: Donut Breakdown -->
+  <div class="panel glass-panel">
+    <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+      <div> 
+        <h3 class="panel-title" style="font-size: 1rem; font-weight: 600;"><i class="fa-solid fa-chart-pie"></i> Segment Breakdown</h3>
+        <p class="panel-subtitle" style="font-size: 0.8rem; color: #64748b;">Distribution across customer base</p>
+      </div>
+      <button onclick="downloadChartImage('segmentChart', 'segment_breakdown.png')" class="btn-pill-download">
+        <i class="fa-solid fa-download" style="color: #2563eb;"></i> Download PNG
+      </button>
+    </div>
+    <div class="chart-container">
+      <div id="segmentChart"></div>
+    </div>
+  </div>
+
+  <!-- Chart Panel 2: Sales/Monetary Analytics -->
+  <div class="panel glass-panel">
+    <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+      <div>
+        <h3 class="panel-title" style="font-size: 1rem; font-weight: 600;"><i class="fa-solid fa-chart-line"></i> Monetary Analytics</h3>
+        <p class="panel-subtitle" style="font-size: 0.8rem; color: #64748b;">Monetary distribution by segment</p>
+      </div>
+      <button onclick="downloadChartImage('trendChart', 'monetary_analytics.png')" class="btn-pill-download">
+        <i class="fa-solid fa-download" style="color: #2563eb;"></i> Download PNG
+      </button>
+    </div>
+    <div class="chart-container">
+      <div id="trendChart"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Customers Table Panel -->
+<div class="panel glass-panel">
+  <div class="panel-header" style="margin-bottom: 1rem;">
+    <div>
+      <h3 class="panel-title" style="font-size: 1.1rem; font-weight: 600;"><i class="fa-solid fa-clock-rotate-left"></i> Recent Customer Activity</h3>
+      <p class="panel-subtitle" style="font-size: 0.85rem; color: #64748b;">Latest batch entries and live classifications</p>
+    </div>
+  </div>
+  <div style="overflow-x: auto;">
+    <table class="styled-table" style="width:100%; border-collapse: collapse; text-align: left;">
+      <thead>
+        <tr style="border-bottom: 2px solid #e2e8f0; color: #64748b; font-size: 0.85rem;">
+          <th style="padding: 10px;">ID</th>
+          <th style="padding: 10px;">Customer</th>
+          <th style="padding: 10px;">Recency (d)</th>
+          <th style="padding: 10px;">Frequency</th>
+          <th style="padding: 10px;">Monetary ($)</th>
+          <th style="padding: 10px;">Segment</th>
+        </tr>
+      </thead>
+      <tbody id="recentTableBody">
+        <tr><td colspan="6" style="padding: 16px; text-align: center; color: #94a3b8;">Loading activity...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<style>
+  .btn-pill-download {
+    background: #f1f5f9;
+    color: #334155;
+    border: 1px solid #cbd5e1;
+    border-radius: 20px;
+    padding: 0.35rem 0.85rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s ease-in-out;
+  }
+  .btn-pill-download:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+  }
+</style>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+
+<script>
+  function speakText(text) {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const speech = new SpeechSynthesisUtterance(text);
+      speech.rate = 1.0;
+      speech.pitch = 1.0;
+      speech.lang = 'en-US';
+      window.speechSynthesis.speak(speech);
+    }
+  }
+
+  function notify(title, message, icon = 'info') {
+    speakText(`${title}. ${message}`);
+    if (typeof Swal !== 'undefined') {
+      Swal.fire({
+        title: title,
+        text: message,
+        icon: icon,
+        confirmButtonColor: '#2563eb',
+        background: '#ffffff',
+        color: '#1e293b'
+      });
+    }
+  }
+
+  function downloadChartImage(chartId, filename) {
+    const chartNode = document.getElementById(chartId);
+    if (chartNode) {
+      Plotly.downloadImage(chartNode, { format: 'png', width: 800, height: 500, filename: filename });
+      notify('Download Started', `Exporting ${filename}`, 'success');
+    }
+  }
+
+  async function refreshDashboard() {
+    try {
+      const res = await fetch('/api/dashboard_data');
+      if (!res.ok) return;
+      const data = await res.json();
+      const stats = data.stats || {};
+      const recent = data.recent || [];
+
+      const kpis = document.querySelectorAll('.kpi-value');
+      if (kpis.length >= 4) {
+        kpis[0].innerText = stats.vip || 0;
+        kpis[1].innerText = stats.loyal || 0;
+        kpis[2].innerText = stats.regular || 0;
+        kpis[3].innerText = stats.at_risk || 0;
+      }
+
+      const rawCounts = [stats.vip || 0, stats.loyal || 0, stats.regular || 0, stats.at_risk || 0];
+      const total = rawCounts.reduce((a, b) => a + b, 0);
+
+      if (total === 0) {
+        document.getElementById('segmentChart').innerHTML = '<div style="text-align:center; padding:2rem; color:#94a3b8;">No customer segment data available.</div>';
+        document.getElementById('trendChart').innerHTML = '<div style="text-align:center; padding:2rem; color:#94a3b8;">No monetary data available.</div>';
+      } else {
+        Plotly.react('segmentChart', [{
+          values: rawCounts,
+          labels: ['VIP', 'Loyal', 'Regular', 'At-Risk'],
+          type: 'pie',
+          hole: 0.55,
+          textinfo: 'percent',
+          marker: { colors: ['#6366F1', '#3B82F6', '#64748B', '#EF4444'] }
+        }], {
+          height: 250, margin: { t: 10, b: 10, l: 10, r: 10 },
+          paper_bgcolor: 'transparent', plot_bgcolor: 'transparent',
+          showlegend: true, legend: { orientation: 'h', x: 0, y: -0.1 },
+          font: { family: 'Inter, sans-serif', color: '#64748b' }
+        }, { displayModeBar: false, responsive: true });
+
+        Plotly.react('trendChart', [{
+          x: ['VIP', 'Loyal', 'Regular', 'At-Risk'],
+          y: rawCounts,
+          type: 'bar',
+          marker: { color: ['#6366F1', '#3B82F6', '#64748B', '#EF4444'] }
+        }], {
+          height: 250, margin: { t: 20, b: 30, l: 30, r: 10 },
+          paper_bgcolor: 'transparent', plot_bgcolor: 'transparent',
+          xaxis: { color: '#64748b' }, yaxis: { color: '#64748b' },
+          font: { family: 'Inter, sans-serif', color: '#64748b' }
+        }, { displayModeBar: false, responsive: true });
+      }
+
+      const tbody = document.getElementById('recentTableBody');
+      if (recent.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="padding: 16px; text-align: center; color: #94a3b8;">No recent activity found.</td></tr>';
+      } else {
+        tbody.innerHTML = recent.map(c => `
+          <tr style="border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 10px; font-weight: 600;">#${c.id}</td>
+            <td style="padding: 10px;">${c.name}</td>
+            <td style="padding: 10px;">${c.recency}</td>
+            <td style="padding: 10px;">${c.frequency}</td>
+            <td style="padding: 10px;">$${Number(c.monetary).toLocaleString()}</td>
+            <td style="padding: 10px;"><span style="background:#e0e7ff; color:#3730a3; padding:2px 8px; border-radius:4px; font-size:0.8rem; font-weight:600;">${c.segment}</span></td>
+          </tr>
+        `).join('');
+      }
+    } catch (e) {
+      console.error("Dashboard refresh error:", e);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', refreshDashboard);
+
+  document.getElementById('predictionForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const btn = document.getElementById('btnClassify');
+    btn.disabled = true;
+
+    const payload = {
+      recency: parseFloat(document.getElementById('recency').value),
+      frequency: parseFloat(document.getElementById('frequency').value),
+      monetary: parseFloat(document.getElementById('monetary').value)
+    };
+    const cId = document.getElementById('customerId').value;
+    if (cId) payload.customer_id = parseInt(cId, 10);
+
+    try {
+     const res = await fetch('/api/predict_single', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        notify('Classification Complete', `Assigned Segment: ${data.segment_name}`, 'success');
+        document.getElementById('predictionForm').reset();
+        refreshDashboard();
+      } else {
+        notify('Classification Error', data.error || 'Failed to calculate.', 'error');
+      }
+    } catch (err) {
+      notify('Server Error', 'Could not reach classifier.', 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  document.getElementById('csvUploadForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const fileInput = document.getElementById('csvFile');
+    const btn = document.getElementById('btnUpload');
+    if (!fileInput.files.length) return notify('No File Selected', 'Choose a CSV file first.', 'warning');
+
+    btn.disabled = true;
+    const formData = new FormData();
+    formData.append('file', fileInput.files[0]);
+
+    try {
+      const res = await fetch('/api/upload_csv', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (res.ok) {
+        notify('Upload Successful', `Processed ${data.processed || 0} customer records!`, 'success');
+        document.getElementById('csvUploadForm').reset();
+        refreshDashboard();
+      } else {
+        notify('Upload Error', data.error || 'File processing failed.', 'error');
+      }
+    } catch (err) {
+      notify('Upload Failed', 'Failed to upload dataset.', 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+</script>
+{% endblock %}

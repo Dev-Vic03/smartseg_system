@@ -1,0 +1,22 @@
+# Virtual Environment
+smartseg_venv/
+venv/
+ENV/
+
+# Python Cache & Bytecode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Flask Instance & Databases
+instance/
+*.db
+*.sqlite3
+
+# Environment variables & secrets
+.env
+.config
+
+# OS-generated files
+.DS_Store

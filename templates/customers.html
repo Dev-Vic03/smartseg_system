@@ -1,0 +1,61 @@
+{% extends "dashboard_base.html" %}
+{% block page_title %}Customer Directory{% endblock %}
+{% block header_title %}Customer Directory & Analytics{% endblock %}
+{% block header_subtitle %}View and search individual customer profiles and RFM metrics{% endblock %}
+
+{% block content %}
+<div class="panel glass-panel">
+  <form method="GET" action="{{ url_for('customers.index') }}" class="styled-form form-row">
+    <input type="text" name="search" value="{{ search_query }}" placeholder="Search customer name, email, or location..." class="form-control">
+    <select name="segment" class="form-control">
+      <option value="">All Segments</option>
+      <option value="VIP" {% if segment_filter == 'VIP' %}selected{% endif %}>VIP</option>
+      <option value="Loyal" {% if segment_filter == 'Loyal' %}selected{% endif %}>Loyal</option>
+      <option value="Regular" {% if segment_filter == 'Regular' %}selected{% endif %}>Regular</option>
+      <option value="At-Risk" {% if segment_filter == 'At-Risk' %}selected{% endif %}>At-Risk</option>
+    </select>
+    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-magnifying-glass"></i> Filter</button>
+  </form>
+</div>
+
+<div class="panel glass-panel style-top-gap" style="margin-top: 1.5rem;">
+  <table class="styled-table" style="width:100%; border-collapse: collapse; text-align: left;">
+    <thead>
+      <tr style="border-bottom: 2px solid #e2e8f0; color: #64748b;">
+        <th style="padding: 12px;">ID</th>
+        <th style="padding: 12px;">Name</th>
+        <th style="padding: 12px;">Recency (d)</th>
+        <th style="padding: 12px;">Frequency</th>
+        <th style="padding: 12px;">Monetary ($)</th>
+        <th style="padding: 12px;">Segment Tag</th>
+        <th style="padding: 12px;">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for cust, seg in records %}
+      <tr style="border-bottom: 1px solid #f1f5f9;">
+        <td style="padding: 12px; font-weight: 600;">#{{ cust.id }}</td>
+        <td style="padding: 12px;">{{ cust.name }}</td>
+        <td style="padding: 12px;">{{ seg.recency if seg else 'N/A' }}</td>
+        <td style="padding: 12px;">{{ seg.frequency if seg else 'N/A' }}</td>
+        <td style="padding: 12px;">${{ "%.2f"|format(seg.monetary) if seg else '0.00' }}</td>
+        <td style="padding: 12px;">
+          <span class="badge" style="background:#e0e7ff; color:#3730a3; padding:4px 8px; border-radius:4px;">
+            {{ seg.segment_name if seg else 'Unassigned' }}
+          </span>
+        </td>
+        <td style="padding: 12px;">
+          <a href="{{ url_for('customers.profile', customer_id=cust.id) }}" class="btn-secondary" style="text-decoration:none; padding: 4px 8px; font-size: 0.8rem;">
+            <i class="fa-solid fa-user"></i> View Profile
+          </a>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="7" style="padding: 16px; text-align: center; color: #94a3b8;">No customers found matching criteria.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

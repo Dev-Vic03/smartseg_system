@@ -1,0 +1,147 @@
+{% extends "dashboard_base.html" %}
+
+{% block page_title %}Campaigns{% endblock %}
+{% block header_title %}Targeted Marketing Campaigns{% endblock %}
+{% block header_subtitle %}Launch, automate, and track high-converting customer segment promotions{% endblock %}
+
+{% block content %}
+
+<!-- Quick Stats Header Row -->
+<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+  <div class="panel glass-panel" style="padding: 1.25rem; display: flex; align-items: center; gap: 1rem;">
+    <div style="background: #e0e7ff; color: #4338ca; width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+      <i class="fa-solid fa-paper-plane"></i>
+    </div>
+    <div>
+      <span style="font-size: 0.8rem; color: #64748b; font-weight: 600; text-transform: uppercase;">Active Campaigns</span>
+      <h3 style="margin: 0; font-size: 1.5rem; font-weight: 700; color: #1e293b;">4</h3>
+    </div>
+  </div>
+
+  <div class="panel glass-panel" style="padding: 1.25rem; display: flex; align-items: center; gap: 1rem;">
+    <div style="background: #f0fdf4; color: #16a34a; width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+      <i class="fa-solid fa-bullseye"></i>
+    </div>
+    <div>
+      <span style="font-size: 0.8rem; color: #64748b; font-weight: 600; text-transform: uppercase;">Total Audience</span>
+      <h3 style="margin: 0; font-size: 1.5rem; font-weight: 700; color: #1e293b;">1,420</h3>
+    </div>
+  </div>
+
+  <div class="panel glass-panel" style="padding: 1.25rem; display: flex; align-items: center; gap: 1rem;">
+    <div style="background: #fef2f2; color: #dc2626; width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+      <i class="fa-solid fa-bolt"></i>
+    </div>
+    <div>
+      <span style="font-size: 0.8rem; color: #64748b; font-weight: 600; text-transform: uppercase;">Avg. Conversion</span>
+      <h3 style="margin: 0; font-size: 1.5rem; font-weight: 700; color: #1e293b;">18.4%</h3>
+    </div>
+  </div>
+</div>
+
+<!-- Main Section: Launch New Campaign & Pre-Configured Templates -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+  <!-- Create Campaign Form -->
+  <div class="panel glass-panel">
+    <div class="panel-header" style="margin-bottom: 1rem;">
+      <div>
+        <h3 class="panel-title" style="font-size: 1.1rem; font-weight: 600;"><i class="fa-solid fa-plus-circle"></i> Create New Campaign</h3>
+        <p class="panel-subtitle" style="font-size: 0.85rem; color: #64748b;">Schedule personalized offers for customer cohorts</p>
+      </div>
+    </div>
+
+    <form id="campaignForm" method="POST" action="{{ url_for('campaigns.create') if 'campaigns.create' in config else '#' }}" class="styled-form">
+      <div style="margin-bottom: 1rem;">
+        <label style="font-size: 0.85rem; font-weight: 600; margin-bottom: 0.3rem; display: block;">Campaign Name</label>
+        <input type="text" id="campaignName" name="name" class="form-control" placeholder="e.g. VIP Loyalty Appreciation Month" required>
+      </div>
+
+      <div style="margin-bottom: 1rem;">
+        <label style="font-size: 0.85rem; font-weight: 600; margin-bottom: 0.3rem; display: block;">Target Segment Cohort</label>
+        <select id="campaignSegment" name="segment" class="form-control" style="width:100%; padding:0.5rem;" required>
+          <option value="VIP Customer">VIP Customer</option>
+          <option value="Loyal Customer">Loyal Customer</option>
+          <option value="Regular Customer">Regular Customer</option>
+          <option value="At-Risk Customer">At-Risk Customer</option>
+        </select>
+      </div>
+
+      <div style="margin-bottom: 1rem;">
+        <label style="font-size: 0.85rem; font-weight: 600; margin-bottom: 0.3rem; display: block;">Marketing Message</label>
+        <textarea id="campaignMessage" name="message" class="form-control" rows="4" placeholder="Compose offer text or paste template snippet..." required></textarea>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width:100%;">
+        <i class="fa-solid fa-paper-plane"></i> Launch Campaign
+      </button>
+    </form>
+  </div>
+
+  <!-- Smart Automated Playbooks -->
+  <div class="panel glass-panel">
+    <div class="panel-header" style="margin-bottom: 1rem;">
+      <div>
+        <h3 class="panel-title" style="font-size: 1.1rem; font-weight: 600;"><i class="fa-solid fa-robot"></i> Automated Segment Playbooks</h3>
+        <p class="panel-subtitle" style="font-size: 0.85rem; color: #64748b;">Recommended actions derived from ML analytics</p>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+      <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.85rem 1rem; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <span style="background: #e0e7ff; color: #3730a3; font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;">VIP</span>
+          <h4 style="font-size: 0.95rem; font-weight: 600; margin: 0.3rem 0 0 0;">Exclusive Early Access</h4>
+          <p style="font-size: 0.8rem; color: #64748b; margin: 0;">Invite high-spending customers to upcoming product releases.</p>
+        </div>
+        <button type="button" class="btn-pill-action" onclick="applyPlaybook('VIP Exclusive Early Access', 'VIP Customer', 'Dear VIP Member, as one of our top valued clients, you are invited to early access to our next collection release!')">Use</button>
+      </div>
+
+      <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.85rem 1rem; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <span style="background: #fef2f2; color: #991b1b; font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;">AT-RISK</span>
+          <h4 style="font-size: 0.95rem; font-weight: 600; margin: 0.3rem 0 0 0;">Win-Back Promo Discount</h4>
+          <p style="font-size: 0.8rem; color: #64748b; margin: 0;">Offer a 20% discount code to customers who haven't ordered recently.</p>
+        </div>
+        <button type="button" class="btn-pill-action" onclick="applyPlaybook('We Miss You - 20% Off', 'At-Risk Customer', 'We miss having you around! Use code RETURN20 at checkout for 20% off your next order.')">Use</button>
+      </div>
+
+      <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.85rem 1rem; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <span style="background: #dbeafe; color: #1e40af; font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;">LOYAL</span>
+          <h4 style="font-size: 0.95rem; font-weight: 600; margin: 0.3rem 0 0 0;">Tiered Bundle Upgrade</h4>
+          <p style="font-size: 0.8rem; color: #64748b; margin: 0;">Encourage repeat orders with tailored product bundle discounts.</p>
+        </div>
+        <button type="button" class="btn-pill-action" onclick="applyPlaybook('Loyal Member Rewards Bundle', 'Loyal Customer', 'Thank you for choosing us continuously! Enjoy double reward points on all bundle orders this week.')">Use</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .btn-pill-action {
+    background: #f1f5f9;
+    color: #334155;
+    border: 1px solid #cbd5e1;
+    border-radius: 20px;
+    padding: 0.3rem 0.9rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-pill-action:hover {
+    background: #2563eb;
+    color: #ffffff;
+    border-color: #2563eb;
+  }
+</style>
+
+<script>
+  function applyPlaybook(name, segment, message) {
+    document.getElementById('campaignName').value = name;
+    document.getElementById('campaignSegment').value = segment;
+    document.getElementById('campaignMessage').value = message;
+    document.getElementById('campaignName').focus();
+  }
+</script>
+{% endblock %}

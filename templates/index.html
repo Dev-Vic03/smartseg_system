@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartSeg - AI Customer Segmentation for SMEs</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  
+  <style>
+    :root {
+      --primary-blue: #2563EB;
+      --dark-blue: #0F172A;
+      --deep-navy: #1E1B4B;
+      --accent-blue: #3B82F6;
+      --light-blue: #EFF6FF;
+      --border-color: #E2E8F0;
+      --text-dark: #1E293B;
+      --text-muted: #64748B;
+      --white: #FFFFFF;
+      --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+      --radius-md: 12px;
+      --radius-lg: 20px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--white);
+      color: var(--text-dark);
+      line-height: 1.6;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    /* Top Announcement Bar */
+    .announcement-bar {
+      background: var(--dark-blue);
+      color: var(--white);
+      text-align: center;
+      padding: 10px 16px;
+      font-size: 0.875rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .announcement-bar a {
+      color: #93C5FD;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Navbar */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 5%;
+      background: var(--white);
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--primary-blue);
+      color: var(--white);
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+    }
+
+    .logo-text {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--dark-blue);
+    }
+
+    .nav-menu {
+      display: flex;
+      gap: 32px;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .nav-menu a:hover {
+      color: var(--primary-blue);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-primary {
+      background: var(--primary-blue);
+      color: var(--white);
+    }
+
+    .btn-primary:hover {
+      background: #1D4ED8;
+    }
+
+    .btn-outline {
+      border: 1px solid var(--border-color);
+      background: var(--white);
+      color: var(--text-dark);
+    }
+
+    .btn-outline:hover {
+      background: var(--light-blue);
+    }
+
+    .btn-light {
+      background: var(--white);
+      color: var(--primary-blue);
+    }
+
+    .btn-text {
+      color: var(--text-dark);
+    }
+
+    .btn-lg {
+      padding: 14px 28px;
+      border-radius: 10px;
+      font-size: 1rem;
+    }
+
+    /* Hero Section */
+    .hero-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      padding: 80px 5%;
+      align-items: center;
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    .badge-tag {
+      color: var(--primary-blue);
+      font-weight: 700;
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+    }
+
+    .hero-content h1 {
+      font-size: 3rem;
+      line-height: 1.2;
+      font-weight: 800;
+      color: var(--dark-blue);
+      margin: 12px 0 20px;
+    }
+
+    .hero-content h1 span {
+      color: var(--primary-blue);
+    }
+
+    .hero-content p {
+      font-size: 1.125rem;
+      color: var(--text-muted);
+      margin-bottom: 30px;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+
+    .hero-features-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      border-top: 1px solid var(--border-color);
+      padding-top: 24px;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .feature-item i {
+      color: var(--primary-blue);
+    }
+
+    /* Hero Visual & Cards */
+    .hero-visual {
+      position: relative;
+      display: flex;
+      justify-content: center;
+    }
+
+    .dashboard-card {
+      background: var(--white);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-lg);
+      width: 100%;
+      max-width: 440px;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+
+    .status-badge {
+      background: #DCFCE7;
+      color: #15803D;
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    .segment-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .segment-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      border-radius: var(--radius-md);
+      background: var(--light-blue);
+    }
+
+    .segment-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .segment-info small {
+      display: block;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .dot.vip { background: #1E3A8A; }
+    .dot.loyal { background: #2563EB; }
+    .dot.regular { background: #60A5FA; }
+    .dot.atrisk { background: #93C5FD; }
+
+    .segment-count {
+      font-weight: 800;
+      font-size: 1.1rem;
+    }
+
+    .floating-widget {
+      position: absolute;
+      background: var(--white);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 12px 20px;
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .top-widget {
+      top: -20px;
+      right: 10px;
+    }
+
+    .floating-widget i {
+      color: #16A34A;
+      font-size: 1.25rem;
+    }
+
+    .floating-widget small {
+      color: var(--text-muted);
+      display: block;
+      font-size: 0.75rem;
+    }
+
+    /* Tech Bar */
+    .tech-bar {
+      text-align: center;
+      padding: 40px 5%;
+      border-top: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+      background: #FAFAFA;
+    }
+
+    .tech-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+
+    .tech-logos {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      flex-wrap: wrap;
+    }
+
+    /* Section Common */
+    .section {
+      padding: 80px 5%;
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    .section-header {
+      text-align: center;
+      max-width: 600px;
+      margin: 0 auto 50px;
+    }
+
+    .sub-title {
+      color: var(--primary-blue);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .section-header h2 {
+      font-size: 2.25rem;
+      color: var(--dark-blue);
+      margin: 10px 0;
+    }
+
+    .section-header p {
+      color: var(--text-muted);
+    }
+
+    /* Feature Cards Grid */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+
+    .card {
+      border: 1px solid var(--border-color);
+      padding: 30px;
+      border-radius: var(--radius-lg);
+      background: var(--white);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .card-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--light-blue);
+      color: var(--primary-blue);
+      border-radius: var(--radius-md);
+      display: grid;
+      place-items: center;
+      font-size: 1.25rem;
+      margin-bottom: 20px;
+    }
+
+    .card h3 {
+      margin-bottom: 10px;
+      color: var(--dark-blue);
+    }
+
+    .card p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    /* Dark Stats Banner */
+    .dark-stats-banner {
+      background: var(--deep-navy);
+      color: var(--white);
+      padding: 80px 5%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: center;
+    }
+
+    .dark-stats-banner .sub-title {
+      color: #93C5FD;
+    }
+
+    .dark-stats-banner h2 {
+      font-size: 2.25rem;
+      margin: 10px 0 16px;
+    }
+
+    .dark-stats-banner p {
+      color: #94A3B8;
+      margin-bottom: 24px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .stat-box {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 24px;
+      border-radius: var(--radius-md);
+      text-align: center;
+    }
+
+    .stat-box h3 {
+      font-size: 2.5rem;
+      color: var(--white);
+    }
+
+    .stat-box p {
+      color: #94A3B8;
+      margin: 0;
+      font-size: 0.875rem;
+    }
+
+    /* Steps Grid */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+    }
+
+    .step-card {
+      border: 1px solid var(--border-color);
+      padding: 30px;
+      border-radius: var(--radius-lg);
+      background: var(--white);
+    }
+
+    .step-badge {
+      width: 36px;
+      height: 36px;
+      background: var(--primary-blue);
+      color: var(--white);
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+
+    .step-card h3 {
+      margin-bottom: 10px;
+      color: var(--dark-blue);
+    }
+
+    .step-card p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    /* Newsletter / Bottom CTA Banner */
+    .newsletter-banner {
+      background: var(--light-blue);
+      border: 1px solid #DBEAFE;
+      border-radius: var(--radius-lg);
+      margin: 40px 5% 80px;
+      padding: 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .banner-content {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .banner-icon {
+      font-size: 2.5rem;
+      color: var(--primary-blue);
+    }
+
+    .banner-content h3 {
+      color: var(--dark-blue);
+      font-size: 1.25rem;
+    }
+
+    .banner-content p {
+      color: var(--text-muted);
+    }
+
+    /* Footer */
+    .site-footer {
+      background: var(--dark-blue);
+      color: var(--white);
+      padding: 60px 5% 20px;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1.5fr;
+      gap: 40px;
+      max-width: 1280px;
+      margin: 0 auto 40px;
+    }
+
+    .footer-brand p {
+      color: #94A3B8;
+      margin-top: 16px;
+      max-width: 300px;
+      font-size: 0.9rem;
+    }
+
+    .footer-brand .logo-text {
+      color: var(--white);
+    }
+
+    .footer-col h4 {
+      margin-bottom: 16px;
+      font-size: 1rem;
+    }
+
+    .footer-col a, .footer-col p {
+      display: block;
+      color: #94A3B8;
+      margin-bottom: 10px;
+      font-size: 0.9rem;
+    }
+
+    .footer-col a:hover {
+      color: var(--white);
+    }
+
+    .footer-bottom {
+      text-align: center;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      color: #64748B;
+      font-size: 0.85rem;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 900px) {
+      .hero-section, .dark-stats-banner {
+        grid-template-columns: 1fr;
+      }
+      .nav-menu {
+        display: none;
+      }
+      .newsletter-banner {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+      }
+      .banner-content {
+        flex-direction: column;
+      }
+      .footer-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Announcement Bar -->
+  <div class="announcement-bar">
+    <span><i class="fa-solid fa-wand-magic-sparkles"></i> NEW: Automated AI Customer Segmentation Model Updated</span>
+    <a href="{{ url_for('auth.register') }}">TRY IT NOW <i class="fa-solid fa-arrow-right"></i></a>
+  </div>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a href="{{ url_for('home') }}" class="logo">
+      <div class="logo-icon"><i class="fa-solid fa-layer-group"></i></div>
+      <span class="logo-text">SmartSeg</span>
+    </a>
+    <div class="nav-menu">
+      <a href="#features">Features</a>
+      <a href="#how">How It Works</a>
+      <a href="#stats">Impact</a>
+      <a href="#technology">Technology</a>
+    </div>
+    <div class="nav-actions">
+      <a href="{{ url_for('auth.login') }}" class="btn btn-text">Login</a>
+      <a href="{{ url_for('auth.register') }}" class="btn btn-primary">Get Started <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <span class="badge-tag">DATA-DRIVEN STRATEGIES</span>
+      <h1>Customer Segmentation That Drives <span>Growth</span> & Delivers Results</h1>
+      <p>SmartSeg reads your sales history and automatically sorts your customers into VIP, Loyal, Regular, and At-Risk groups — so you know who to reward and who's about to walk away.</p>
+      
+      <div class="hero-buttons">
+        <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">Get Started Free <i class="fa-solid fa-arrow-right"></i></a>
+        <a href="#how" class="btn btn-outline btn-lg">View How It Works</a>
+      </div>
+
+      <div class="hero-features-list">
+        <div class="feature-item"><i class="fa-solid fa-bullseye"></i> AI-Clustered</div>
+        <div class="feature-item"><i class="fa-solid fa-chart-line"></i> Churn Alert</div>
+        <div class="feature-item"><i class="fa-solid fa-volume-high"></i> Voice Feedback</div>
+        <div class="feature-item"><i class="fa-solid fa-bolt"></i> Instant Insights</div>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="dashboard-card">
+        <div class="card-header">
+          <span><i class="fa-solid fa-chart-pie"></i> Customer Segments</span>
+          <span class="status-badge">Live Sync</span>
+        </div>
+        <div class="segment-list">
+          <div class="segment-row">
+            <div class="segment-info">
+              <span class="dot vip"></span>
+              <div>
+                <strong>VIP Customers</strong>
+                <small>Top revenue drivers</small>
+              </div>
+            </div>
+            <span class="segment-count">13</span>
+          </div>
+          <div class="segment-row">
+            <div class="segment-info">
+              <span class="dot loyal"></span>
+              <div>
+                <strong>Loyal Customers</strong>
+                <small>Frequent buyers</small>
+              </div>
+            </div>
+            <span class="segment-count">204</span>
+          </div>
+          <div class="segment-row">
+            <div class="segment-info">
+              <span class="dot regular"></span>
+              <div>
+                <strong>Regular Customers</strong>
+                <small>Standard purchasing</small>
+              </div>
+            </div>
+            <span class="segment-count">3,034</span>
+          </div>
+          <div class="segment-row">
+            <div class="segment-info">
+              <span class="dot atrisk"></span>
+              <div>
+                <strong>At-Risk Customers</strong>
+                <small>Requires retention action</small>
+              </div>
+            </div>
+            <span class="segment-count">1,067</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="floating-widget top-widget">
+        <i class="fa-solid fa-arrow-trend-up"></i>
+        <div>
+          <small>Retention Rate</small>
+          <strong>+24%</strong>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tech Stack -->
+  <section id="technology" class="tech-bar">
+    <p class="tech-label">POWERED BY ENTERPRISE-GRADE AI TECH STACK</p>
+    <div class="tech-logos">
+      <span><i class="fa-brands fa-python"></i> Python</span>
+      <span><i class="fa-solid fa-flask"></i> Flask</span>
+      <span><i class="fa-solid fa-gears"></i> Scikit-Learn</span>
+      <span><i class="fa-solid fa-database"></i> MySQL</span>
+      <span><i class="fa-solid fa-chart-pie"></i> Plotly</span>
+    </div>
+  </section>
+
+  <!-- Features Grid -->
+  <section id="features" class="section">
+    <div class="section-header">
+      <span class="sub-title">WHAT WE DO</span>
+      <h2>Smart Features That Make an Impact</h2>
+      <p>Built specifically for small and medium businesses working with real transaction data.</p>
+    </div>
+
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-icon"><i class="fa-solid fa-brain"></i></div>
+        <h3>AI-Powered Clustering</h3>
+        <p>K-Means groups customers by purchasing behavior automatically, eliminating manual spreadsheets and guessing games.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-icon"><i class="fa-solid fa-bullhorn"></i></div>
+        <h3>Voice Feedback Engine</h3>
+        <p>The system reads out each classification result and metric summary the moment it is calculated.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-icon"><i class="fa-solid fa-chart-line"></i></div>
+        <h3>Churn Forecasting</h3>
+        <p>Get flagged early when a customer's buying frequency drops before they completely walk away.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Dark Blue Stats Banner -->
+  <section id="stats" class="dark-stats-banner">
+    <div class="stats-header">
+      <span class="sub-title">REAL STRATEGIES</span>
+      <h2>Real Results for Real SME Growth</h2>
+      <p>We combine machine learning algorithms and transaction history to deliver actionable intelligence.</p>
+      <a href="{{ url_for('auth.register') }}" class="btn btn-light">Get Started Free <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-box">
+        <h3>4</h3>
+        <p>Core Segments</p>
+      </div>
+      <div class="stat-box">
+        <h3>98%</h3>
+        <p>Sorting Accuracy</p>
+      </div>
+      <div class="stat-box">
+        <h3>3.5X</h3>
+        <p>Campaign ROI</p>
+      </div>
+      <div class="stat-box">
+        <h3>100%</h3>
+        <p>Automated Pipeline</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section id="how" class="section">
+    <div class="section-header">
+      <span class="sub-title">SIMPLE WORKFLOW</span>
+      <h2>How SmartSeg Works</h2>
+      <p>From raw transaction logs to actionable customer groups in three easy steps.</p>
+    </div>
+
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-badge">1</div>
+        <h3>Import Transaction Data</h3>
+        <p>Enter individual customer transaction details directly or upload bulk CSV files.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-badge">2</div>
+        <h3>AI Model Processing</h3>
+        <p>Scikit-Learn algorithms normalize variables and assign each profile to an optimal cluster.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-badge">3</div>
+        <h3>Execute Targeted Action</h3>
+        <p>View interactive segment breakdowns on your dashboard and target high-value buyers.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Banner -->
+  <section class="newsletter-banner">
+    <div class="banner-content">
+      <i class="fa-solid fa-paper-plane banner-icon"></i>
+      <div>
+        <h3>Stay Ahead in Customer Intelligence</h3>
+        <p>Ready to automate your SME customer classification and boost retention?</p>
+      </div>
+    </div>
+    <a href="{{ url_for('auth.register') }}" class="btn btn-primary">Create Free Account</a>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="#" class="logo">
+          <div class="logo-icon"><i class="fa-solid fa-layer-group"></i></div>
+          <span class="logo-text">SmartSeg</span>
+        </a>
+        <p>Helping small and medium enterprises grow with intelligent, automated customer segmentation.</p>
+      </div>
+
+      <div class="footer-col">
+        <h4>Navigation</h4>
+        <a href="#features">Features</a>
+        <a href="#how">How It Works</a>
+        <a href="#technology">Technology</a>
+      </div>
+
+      <div class="footer-col">
+        <h4>Account</h4>
+        <a href="{{ url_for('auth.login') }}">Login</a>
+        <a href="{{ url_for('auth.register') }}">Register</a>
+      </div>
+
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <p><i class="fa-solid fa-envelope"></i> support@smartseg.ai</p>
+        <p><i class="fa-solid fa-globe"></i> www.smartseg.ai</p>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      &copy; 2026 SmartSeg. All Rights Reserved.
+    </div>
+  </footer>
+
+</body>
+</html>
