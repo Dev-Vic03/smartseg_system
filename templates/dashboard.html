@@ -1,7 +1,7 @@
 {% extends "dashboard_base.html" %}
 
 {% block page_title %}Dashboard{% endblock %}
-{% block header_title %}Welcome back, {{ session.get('user_name', 'there') }}{% endblock %}
+{% block header_title %}Welcome back, {{ session.get('user_name') or 'User' }}{% endblock %}
 {% block header_subtitle %}Real-time customer segmentation metrics and classification engine{% endblock %}
 
 {% block content %}
@@ -72,7 +72,16 @@
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
           <div class="field">
             <label for="customerId" style="font-size: 0.8rem; font-weight: 600;">Customer ID <span style="font-weight: 400; color:#94a3b8;">(Opt)</span></label>
-            <input type="number" id="customerId" class="form-control" placeholder="e.g. 1024">
+            <div style="position: relative;">
+              <select id="customerId" class="form-control" style="appearance: none; cursor: pointer;">
+                <option value="" disabled selected>Select or create new...</option>
+                <option value="new">+ Create New Customer</option>
+                {% for c in customers %}
+                  <option value="{{ c.id }}">#{{ c.id }} - {{ c.name }}</option>
+                {% endfor %}
+              </select>
+              <i class="fa-solid fa-chevron-down" style="position: absolute; right: 15px; top: 12px; color: #94a3b8; pointer-events: none;"></i>
+            </div>
           </div>
           <div class="field">
             <label for="recency" style="font-size: 0.8rem; font-weight: 600;">Recency <span style="font-weight: 400; color:#94a3b8;">(Days)</span></label>
@@ -91,7 +100,7 @@
           </div>
         </div>
 
-        <button type="submit" id="btnClassify" class="btn btn-primary" style="width: 100%;">
+        <button type="submit" id="btnClassify" class="btn btn-primary no-loader" style="width: 100%;">
           <i class="fa-solid fa-bolt"></i> Classify Customer
         </button>
       </form>
@@ -114,10 +123,14 @@
     </div>
 
     <form id="csvUploadForm" class="styled-form" method="POST" enctype="multipart/form-data" style="margin-top: auto;">
-      <div class="file-upload-wrapper" style="margin-bottom: 1rem;">
-        <input type="file" id="csvFile" name="file" accept=".csv" class="form-control" required>
+      <div class="file-upload-wrapper" style="margin-bottom: 1rem; position: relative;">
+        <input type="file" id="csvFile" name="file" accept=".csv" required style="opacity: 0; position: absolute; width: 100%; height: 100%; cursor: pointer; z-index: 2;">
+        <div id="fileDragArea" style="border: 2px dashed #cbd5e1; border-radius: 8px; padding: 25px; text-align: center; background: rgba(248,250,252,0.6); transition: all 0.2s ease;">
+           <i class="fa-solid fa-cloud-arrow-up fa-2x" style="color: #94a3b8; margin-bottom: 10px;"></i>
+           <div id="fileNameDisplay" style="font-weight: 500; color: #475569; font-size: 0.9rem;">Click or drag .csv file here</div>
+        </div>
       </div>
-      <button type="submit" id="btnUpload" class="btn btn-primary" style="width: 100%;">
+      <button type="submit" id="btnUpload" class="btn btn-primary no-loader" style="width: 100%;">
         <i class="fa-solid fa-gears"></i> Process Dataset Batch
       </button>
     </form>
@@ -247,73 +260,97 @@
     }
   }
 
+  function updateDashboardUI(stats, recent) {
+    const kpis = document.querySelectorAll('.kpi-value');
+    if (kpis.length >= 4) {
+      kpis[0].innerText = stats.vip || 0;
+      kpis[1].innerText = stats.loyal || 0;
+      kpis[2].innerText = stats.regular || 0;
+      kpis[3].innerText = stats.at_risk || 0;
+    }
+
+    const rawCounts = [stats.vip || 0, stats.loyal || 0, stats.regular || 0, stats.at_risk || 0];
+    const total = rawCounts.reduce((a, b) => a + b, 0);
+
+    if (total === 0) {
+      document.getElementById('segmentChart').innerHTML = '<div style="text-align:center; padding:2rem; color:#94a3b8;">No customer segment data available.</div>';
+      document.getElementById('trendChart').innerHTML = '<div style="text-align:center; padding:2rem; color:#94a3b8;">No monetary data available.</div>';
+    } else {
+      Plotly.react('segmentChart', [{
+        values: rawCounts,
+        labels: ['VIP', 'Loyal', 'Regular', 'At-Risk'],
+        type: 'pie',
+        hole: 0.55,
+        textinfo: 'percent',
+        marker: { colors: ['#6366F1', '#3B82F6', '#64748B', '#EF4444'] }
+      }], {
+        height: 250, margin: { t: 10, b: 10, l: 10, r: 10 },
+        paper_bgcolor: 'transparent', plot_bgcolor: 'transparent',
+        showlegend: true, legend: { orientation: 'h', x: 0, y: -0.1 },
+        font: { family: 'Inter, sans-serif', color: '#64748b' }
+      }, { displayModeBar: false, responsive: true });
+
+      Plotly.react('trendChart', [{
+        x: ['VIP', 'Loyal', 'Regular', 'At-Risk'],
+        y: rawCounts,
+        type: 'bar',
+        marker: { color: ['#6366F1', '#3B82F6', '#64748B', '#EF4444'] }
+      }], {
+        height: 250, margin: { t: 20, b: 30, l: 30, r: 10 },
+        paper_bgcolor: 'transparent', plot_bgcolor: 'transparent',
+        xaxis: { color: '#64748b' }, yaxis: { color: '#64748b' },
+        font: { family: 'Inter, sans-serif', color: '#64748b' }
+      }, { displayModeBar: false, responsive: true });
+    }
+
+    const tbody = document.getElementById('recentTableBody');
+    if (!recent || recent.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="padding: 16px; text-align: center; color: #94a3b8;">No recent activity found.</td></tr>';
+    } else {
+      tbody.innerHTML = recent.map(c => `
+        <tr style="border-bottom: 1px solid #f1f5f9;">
+          <td style="padding: 10px; font-weight: 600;">#${c.id}</td>
+          <td style="padding: 10px;">${c.name}</td>
+          <td style="padding: 10px;">${c.recency}</td>
+          <td style="padding: 10px;">${c.frequency}</td>
+          <td style="padding: 10px;">$${Number(c.monetary).toLocaleString()}</td>
+          <td style="padding: 10px;"><span style="background:#e0e7ff; color:#3730a3; padding:2px 8px; border-radius:4px; font-size:0.8rem; font-weight:600;">${c.segment}</span></td>
+        </tr>
+      `).join('');
+    }
+  }
+
+  function showDashboardSkeleton() {
+    // Blur charts
+    const pie = document.getElementById('pieChart');
+    const trend = document.getElementById('trendChart');
+    if (pie) pie.style.opacity = '0.4';
+    if (trend) trend.style.opacity = '0.4';
+    
+    // Add spinner to table
+    const tbody = document.getElementById('recentTableBody');
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6" style="padding: 40px; text-align: center; color: #6366f1;">
+          <i class="fa-solid fa-circle-notch fa-spin fa-2x"></i>
+          <p style="margin-top: 10px; font-weight: 500; font-size: 0.9rem;">Processing Data...</p>
+        </td>
+      </tr>
+    `;
+  }
+
   async function refreshDashboard() {
     try {
+      showDashboardSkeleton();
       const res = await fetch('/api/dashboard_data');
       if (!res.ok) return;
       const data = await res.json();
-      const stats = data.stats || {};
-      const recent = data.recent || [];
-
-      const kpis = document.querySelectorAll('.kpi-value');
-      if (kpis.length >= 4) {
-        kpis[0].innerText = stats.vip || 0;
-        kpis[1].innerText = stats.loyal || 0;
-        kpis[2].innerText = stats.regular || 0;
-        kpis[3].innerText = stats.at_risk || 0;
-      }
-
-      const rawCounts = [stats.vip || 0, stats.loyal || 0, stats.regular || 0, stats.at_risk || 0];
-      const total = rawCounts.reduce((a, b) => a + b, 0);
-
-      if (total === 0) {
-        document.getElementById('segmentChart').innerHTML = '<div style="text-align:center; padding:2rem; color:#94a3b8;">No customer segment data available.</div>';
-        document.getElementById('trendChart').innerHTML = '<div style="text-align:center; padding:2rem; color:#94a3b8;">No monetary data available.</div>';
-      } else {
-        Plotly.react('segmentChart', [{
-          values: rawCounts,
-          labels: ['VIP', 'Loyal', 'Regular', 'At-Risk'],
-          type: 'pie',
-          hole: 0.55,
-          textinfo: 'percent',
-          marker: { colors: ['#6366F1', '#3B82F6', '#64748B', '#EF4444'] }
-        }], {
-          height: 250, margin: { t: 10, b: 10, l: 10, r: 10 },
-          paper_bgcolor: 'transparent', plot_bgcolor: 'transparent',
-          showlegend: true, legend: { orientation: 'h', x: 0, y: -0.1 },
-          font: { family: 'Inter, sans-serif', color: '#64748b' }
-        }, { displayModeBar: false, responsive: true });
-
-        Plotly.react('trendChart', [{
-          x: ['VIP', 'Loyal', 'Regular', 'At-Risk'],
-          y: rawCounts,
-          type: 'bar',
-          marker: { color: ['#6366F1', '#3B82F6', '#64748B', '#EF4444'] }
-        }], {
-          height: 250, margin: { t: 20, b: 30, l: 30, r: 10 },
-          paper_bgcolor: 'transparent', plot_bgcolor: 'transparent',
-          xaxis: { color: '#64748b' }, yaxis: { color: '#64748b' },
-          font: { family: 'Inter, sans-serif', color: '#64748b' }
-        }, { displayModeBar: false, responsive: true });
-      }
-
-      const tbody = document.getElementById('recentTableBody');
-      if (recent.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="padding: 16px; text-align: center; color: #94a3b8;">No recent activity found.</td></tr>';
-      } else {
-        tbody.innerHTML = recent.map(c => `
-          <tr style="border-bottom: 1px solid #f1f5f9;">
-            <td style="padding: 10px; font-weight: 600;">#${c.id}</td>
-            <td style="padding: 10px;">${c.name}</td>
-            <td style="padding: 10px;">${c.recency}</td>
-            <td style="padding: 10px;">${c.frequency}</td>
-            <td style="padding: 10px;">$${Number(c.monetary).toLocaleString()}</td>
-            <td style="padding: 10px;"><span style="background:#e0e7ff; color:#3730a3; padding:2px 8px; border-radius:4px; font-size:0.8rem; font-weight:600;">${c.segment}</span></td>
-          </tr>
-        `).join('');
-      }
+      updateDashboardUI(data.stats || {}, data.recent || []);
     } catch (e) {
       console.error("Dashboard refresh error:", e);
+    } finally {
+      document.getElementById('pieChart').style.opacity = '1';
+      document.getElementById('trendChart').style.opacity = '1';
     }
   }
 
@@ -323,6 +360,7 @@
     e.preventDefault();
     const btn = document.getElementById('btnClassify');
     btn.disabled = true;
+    showDashboardSkeleton();
 
     const payload = {
       recency: parseFloat(document.getElementById('recency').value),
@@ -343,12 +381,20 @@
       if (res.ok) {
         notify('Classification Complete', `Assigned Segment: ${data.segment_name}`, 'success');
         document.getElementById('predictionForm').reset();
-        refreshDashboard();
+        
+        // INSTANT RENDER: Update UI directly with data from response!
+        if (data.stats && data.recent) {
+          updateDashboardUI(data.stats, data.recent);
+        } else {
+          refreshDashboard();
+        }
       } else {
         notify('Classification Error', data.error || 'Failed to calculate.', 'error');
+        refreshDashboard(); // recover UI on error
       }
     } catch (err) {
       notify('Server Error', 'Could not reach classifier.', 'error');
+      refreshDashboard(); // recover UI on error
     } finally {
       btn.disabled = false;
     }
@@ -361,6 +407,8 @@
     if (!fileInput.files.length) return notify('No File Selected', 'Choose a CSV file first.', 'warning');
 
     btn.disabled = true;
+    showDashboardSkeleton();
+    
     const formData = new FormData();
     formData.append('file', fileInput.files[0]);
 
@@ -368,17 +416,47 @@
       const res = await fetch('/api/upload_csv', { method: 'POST', body: formData });
       const data = await res.json();
       if (res.ok) {
-        notify('Upload Successful', `Processed ${data.processed || 0} customer records!`, 'success');
+        const timeText = data.execution_time_ms ? ` in ${data.execution_time_ms} ms` : '';
+        notify('Upload Successful', `Processed ${data.processed || 0} customer records${timeText}! Output rendered before cloud DB sync.`, 'success');
         document.getElementById('csvUploadForm').reset();
-        refreshDashboard();
+        
+        // INSTANT RENDER: Update UI directly with data from response!
+        if (data.stats && data.recent) {
+          updateDashboardUI(data.stats, data.recent);
+        } else {
+          refreshDashboard();
+        }
       } else {
         notify('Upload Error', data.error || 'File processing failed.', 'error');
+        refreshDashboard(); // recover UI on error
       }
     } catch (err) {
       notify('Upload Failed', 'Failed to upload dataset.', 'error');
+      refreshDashboard(); // recover UI on error
     } finally {
       btn.disabled = false;
     }
   });
+
+  // Custom File Input UI Handler
+  const fileInput = document.getElementById('csvFile');
+  const fileNameDisplay = document.getElementById('fileNameDisplay');
+  const fileDragArea = document.getElementById('fileDragArea');
+
+  if (fileInput) {
+    fileInput.addEventListener('change', function() {
+      if (this.files && this.files.length > 0) {
+        fileNameDisplay.textContent = this.files[0].name;
+        fileNameDisplay.style.color = '#4338ca';
+        fileDragArea.style.borderColor = '#6366f1';
+        fileDragArea.style.background = 'rgba(99, 102, 241, 0.05)';
+      } else {
+        fileNameDisplay.textContent = 'Click or drag .csv file here';
+        fileNameDisplay.style.color = '#475569';
+        fileDragArea.style.borderColor = '#cbd5e1';
+        fileDragArea.style.background = 'rgba(248,250,252,0.6)';
+      }
+    });
+  }
 </script>
 {% endblock %}

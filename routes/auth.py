@@ -61,18 +61,20 @@ def login():
     if request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('password')
-
         user = User.query.filter_by(email=email).first()
         if user and check_password_hash(user.password, password):
             # If Multi-Factor Authentication is enabled on this account
             if user.mfa_enabled:
+                session.clear()
                 session['pending_user_id'] = user.id
                 return redirect(url_for('auth.mfa_verify'))
 
             # Standard Direct Login Session Setup
+            session.clear()
             session['user_id'] = user.id
             session['user_name'] = user.name
             session['user_role'] = user.role
+            session['fresh_login'] = True
             return redirect(url_for('dashboard'))
 
         flash('Invalid email or password.', 'error')
@@ -97,6 +99,7 @@ def mfa_verify():
                 session['user_id'] = user.id
                 session['user_name'] = user.name
                 session['user_role'] = user.role
+                session['fresh_login'] = True
                 flash('Authentication successful.', 'success')
                 return redirect(url_for('dashboard'))
 
