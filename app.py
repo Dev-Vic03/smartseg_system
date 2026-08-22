@@ -16,7 +16,6 @@ from routes.customers import customers_bp
 from routes.campaigns import campaigns_bp
 from routes.reports import reports_bp
 from routes.settings import settings_bp
-
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
@@ -38,6 +37,9 @@ def create_app():
     # Tables are pre-created in database; bypass synchronous table creation check on every reload
     # with app.app_context():
     #     db.create_all()
+    @app.get('/ping')
+    def ping():
+        return jsonify({"message": "successfully pinged"}), 200
 
     @app.after_request
     def add_security_headers(response):
@@ -339,6 +341,7 @@ def create_app():
 
     return app
 
+app = create_app()
+
 if __name__ == '__main__':
-    app = create_app()
     app.run(debug=True)
