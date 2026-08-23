@@ -29,11 +29,16 @@ def register():
         name = request.form.get('fullname')
         email = request.form.get('email')
         password = request.form.get('password')
-        business_name = request.form.get('business_name')
-        business_type = request.form.get('business_type')
+        confirm_password = request.form.get('confirm_password')
+        business_name = request.form.get('business_name', '')
+        business_type = request.form.get('business_type', '')
 
-        if not all([name, email, password]):
+        if not all([name, email, password, confirm_password]):
             flash('All required fields must be filled.', 'error')
+            return render_template('register.html')
+
+        if password != confirm_password:
+            flash('Passwords do not match.', 'error')
             return render_template('register.html')
 
         if User.query.filter_by(email=email).first():

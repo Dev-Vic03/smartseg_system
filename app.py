@@ -60,26 +60,6 @@ def create_app():
     def dashboard():
         user_id = session['user_id']
         
-        # STRICT REFRESH HANDLING: If this is not the immediate redirect after login, it is a refresh/reload.
-        if not session.pop('fresh_login', False):
-            # 1. Wipe the data permanently in the background to avoid blocking the page load
-            import threading
-            def async_wipe_data(app_obj, u_id):
-                with app_obj.app_context():
-                    try:
-                        with db.engine.begin() as conn:
-                            # Use raw SQL for maximum speed
-                            conn.execute(db.text("DELETE FROM segments WHERE customer_id IN (SELECT id FROM customers WHERE user_id = :u_id)"), {'u_id': u_id})
-                            conn.execute(db.text("DELETE FROM customers WHERE user_id = :u_id"), {'u_id': u_id})
-                    except Exception as e:
-                        app_obj.logger.error(f"Async Wipe Error: {e}")
-            
-            threading.Thread(target=async_wipe_data, args=(current_app._get_current_object(), user_id)).start()
-                
-            # 2. Log out the user and route them back
-            session.clear()
-            flash("Session expired due to page refresh. Please log in again.", "info")
-            return redirect(url_for('auth.login'))
 
         # Since data is wiped on logout/refresh, stats start at zero.
         stats = {

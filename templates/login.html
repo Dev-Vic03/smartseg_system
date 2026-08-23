@@ -324,7 +324,10 @@
 
         <div class="form-group">
           <label for="password">Password</label>
-          <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required>
+          <div style="position: relative;">
+            <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required>
+            <i class="fa-solid fa-eye" id="togglePassword" style="position: absolute; right: 15px; top: 14px; cursor: pointer; color: #64748b;"></i>
+          </div>
         </div>
 
         <div class="form-options">
@@ -341,5 +344,16 @@
   </div>
 
   <script src="{{ url_for('static', filename='js/global_loader.js') }}"></script>
+  <script>
+    const togglePassword = document.getElementById('togglePassword');
+    const password = document.getElementById('password');
+    if(togglePassword) {
+      togglePassword.addEventListener('click', function () {
+        const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+        password.setAttribute('type', type);
+        this.classList.toggle('fa-eye-slash');
+      });
+    }
+  </script>
 </body>
 </html>

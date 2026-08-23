@@ -141,6 +141,14 @@
       font-weight: 600; 
       cursor: pointer; 
     }
+    .alert {
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      margin-bottom: 20px;
+    }
+    .alert-danger { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+    .alert-success { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
     .btn-sso { 
       width: 100%; 
       padding: 12px; 
@@ -203,6 +211,17 @@
         <p class="subtext">Already have an account? <a href="{{ url_for('auth.login') }}">Log in here</a></p>
       </div>
 
+      <!-- Flask Flash Messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
       <form action="{{ url_for('auth.register') }}" method="POST">
         <div class="form-group">
           <label for="fullname">Full Name</label>
@@ -216,7 +235,18 @@
 
         <div class="form-group">
           <label for="password">Password</label>
-          <input type="password" id="password" name="password" class="form-control" placeholder="Minimum 8 characters" required>
+          <div style="position: relative;">
+            <input type="password" id="password" name="password" class="form-control" placeholder="Minimum 8 characters" required>
+            <i class="fa-solid fa-eye" id="togglePassword" style="position: absolute; right: 15px; top: 14px; cursor: pointer; color: #64748b;"></i>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="confirm_password">Confirm Password</label>
+          <div style="position: relative;">
+            <input type="password" id="confirm_password" name="confirm_password" class="form-control" placeholder="Minimum 8 characters" required>
+            <i class="fa-solid fa-eye" id="toggleConfirmPassword" style="position: absolute; right: 15px; top: 14px; cursor: pointer; color: #64748b;"></i>
+          </div>
         </div>
 
         <div class="form-group" style="display:flex; gap:8px; align-items:center; margin-bottom:20px;">
@@ -232,5 +262,26 @@
   </div>
 
   <script src="{{ url_for('static', filename='js/global_loader.js') }}"></script>
+  <script>
+    const togglePassword = document.getElementById('togglePassword');
+    const password = document.getElementById('password');
+    if(togglePassword) {
+      togglePassword.addEventListener('click', function () {
+        const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+        password.setAttribute('type', type);
+        this.classList.toggle('fa-eye-slash');
+      });
+    }
+
+    const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+    const confirm_password = document.getElementById('confirm_password');
+    if(toggleConfirmPassword) {
+      toggleConfirmPassword.addEventListener('click', function () {
+        const type = confirm_password.getAttribute('type') === 'password' ? 'text' : 'password';
+        confirm_password.setAttribute('type', type);
+        this.classList.toggle('fa-eye-slash');
+      });
+    }
+  </script>
 </body>
 </html>
