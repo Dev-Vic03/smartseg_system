@@ -368,7 +368,9 @@
       monetary: parseFloat(document.getElementById('monetary').value)
     };
     const cId = document.getElementById('customerId').value;
-    if (cId) payload.customer_id = parseInt(cId, 10);
+    if (cId && cId !== "new") {
+      payload.customer_id = parseInt(cId, 10);
+    }
 
     try {
      const res = await fetch('/api/predict_single', {

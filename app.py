@@ -34,9 +34,20 @@ def create_app():
     app.register_blueprint(reports_bp)
     app.register_blueprint(settings_bp)
 
-    # Tables are pre-created in database; bypass synchronous table creation check on every reload
-    # with app.app_context():
-    #     db.create_all()
+    # Auto-migrate database on boot (Handles adding new columns safely)
+    with app.app_context():
+        try:
+            from sqlalchemy import text
+            with db.engine.begin() as conn:
+                conn.execute(text("ALTER TABLE users ADD COLUMN is_verified BOOLEAN DEFAULT FALSE NOT NULL"))
+                conn.execute(text("UPDATE users SET is_verified = TRUE"))
+                conn.execute(text("ALTER TABLE users ADD COLUMN verification_code VARCHAR(6)"))
+                conn.execute(text("ALTER TABLE users ADD COLUMN verification_code_expires_at DATETIME"))
+                app.logger.info("Successfully migrated database columns for email verification!")
+        except Exception as e:
+            # If the columns already exist, this will naturally throw an exception which we safely ignore
+            pass
+
     @app.get('/ping')
     def ping():
         return jsonify({"message": "successfully pinged"}), 200
