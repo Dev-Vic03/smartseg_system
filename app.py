@@ -36,17 +36,22 @@ def create_app():
 
     # Auto-migrate database on boot (Handles adding new columns safely)
     with app.app_context():
-        try:
-            from sqlalchemy import text
-            with db.engine.begin() as conn:
-                conn.execute(text("ALTER TABLE users ADD COLUMN is_verified BOOLEAN DEFAULT FALSE NOT NULL"))
-                conn.execute(text("UPDATE users SET is_verified = TRUE"))
-                conn.execute(text("ALTER TABLE users ADD COLUMN verification_code VARCHAR(6)"))
-                conn.execute(text("ALTER TABLE users ADD COLUMN verification_code_expires_at DATETIME"))
-                app.logger.info("Successfully migrated database columns for email verification!")
-        except Exception as e:
-            # If the columns already exist, this will naturally throw an exception which we safely ignore
-            pass
+        from sqlalchemy import text
+        
+        queries = [
+            "ALTER TABLE users ADD COLUMN is_verified BOOLEAN DEFAULT FALSE NOT NULL",
+            "UPDATE users SET is_verified = TRUE",
+            "ALTER TABLE users ADD COLUMN verification_code VARCHAR(6)",
+            "ALTER TABLE users ADD COLUMN verification_code_expires_at DATETIME"
+        ]
+        
+        with db.engine.begin() as conn:
+            for q in queries:
+                try:
+                    conn.execute(text(q))
+                except Exception:
+                    pass
+        app.logger.info("Database migration check completed.")
 
     @app.get('/ping')
     def ping():
