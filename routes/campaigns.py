@@ -18,6 +18,41 @@ def index():
     }
     return render_template('campaigns.html', campaigns=user_campaigns, templates=default_templates)
 
+@campaigns_bp.route('/campaigns/create', methods=['POST'])
+@login_required
+def create():
+    name = request.form.get('name')
+    segment = request.form.get('segment')
+    message = request.form.get('message')
+    user_id = session['user_id']
+    
+    new_campaign = Campaign(
+        title=name,
+        segment_name=segment,
+        subject=name,
+        body_template=message,
+        user_id=user_id
+    )
+    db.session.add(new_campaign)
+    db.session.commit()
+    
+    return redirect(url_for('campaigns.summary', campaign_id=new_campaign.id))
+
+@campaigns_bp.route('/campaigns/<int:campaign_id>/summary')
+@login_required
+def summary(campaign_id):
+    user_id = session['user_id']
+    campaign = Campaign.query.filter_by(id=campaign_id, user_id=user_id).first_or_404()
+    
+    # Calculate audience size for this segment
+    from database.models import Customer, Segment
+    audience_count = Customer.query.join(Segment, Customer.id == Segment.customer_id).filter(
+        Customer.user_id == user_id, 
+        Segment.segment_name == campaign.segment_name
+    ).count()
+    
+    return render_template('campaign_summary.html', campaign=campaign, audience_count=audience_count)
+
 @campaigns_bp.route('/api/campaigns/send', methods=['POST'])
 @login_required
 def send_campaign():

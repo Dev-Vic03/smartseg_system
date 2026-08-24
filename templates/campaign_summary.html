@@ -1,0 +1,100 @@
+{% extends "dashboard_base.html" %}
+
+{% block page_title %}Campaign Summary{% endblock %}
+{% block header_title %}Campaign Ready for Launch{% endblock %}
+{% block header_subtitle %}Review your campaign details and audience before sending{% endblock %}
+
+{% block content %}
+<div class="panel glass-panel" style="max-width: 800px; margin: 0 auto; padding: 2rem;">
+  
+  <div style="text-align: center; margin-bottom: 2rem;">
+    <div style="background: #e0e7ff; color: #4338ca; width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto 1rem auto;">
+      <i class="fa-solid fa-rocket"></i>
+    </div>
+    <h2 style="font-size: 1.5rem; font-weight: 700; color: #1e293b;">{{ campaign.title }}</h2>
+    <p style="color: #64748b; margin-top: 0.5rem;">Review your automated marketing playbook</p>
+  </div>
+
+  <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 1rem; margin-bottom: 1rem;">
+      <div>
+        <div style="font-size: 0.8rem; color: #64748b; font-weight: 600; text-transform: uppercase;">Target Segment</div>
+        <div style="font-size: 1.1rem; font-weight: 600; color: #1e293b; margin-top: 0.25rem;">
+          <span style="background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 4px; font-size: 0.85rem;">{{ campaign.segment_name }}</span>
+        </div>
+      </div>
+      <div>
+        <div style="font-size: 0.8rem; color: #64748b; font-weight: 600; text-transform: uppercase;">Audience Size</div>
+        <div style="font-size: 1.25rem; font-weight: 700; color: #1e293b; margin-top: 0.25rem;">
+          {{ audience_count }} <span style="font-size: 0.9rem; font-weight: 400; color: #64748b;">customers</span>
+        </div>
+      </div>
+    </div>
+    
+    <div>
+      <div style="font-size: 0.8rem; color: #64748b; font-weight: 600; text-transform: uppercase; margin-bottom: 0.5rem;">Message Preview</div>
+      <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 1rem; color: #334155; font-size: 0.95rem; line-height: 1.6; white-space: pre-wrap;">{{ campaign.body_template }}</div>
+    </div>
+  </div>
+
+  <div style="display: flex; gap: 1rem; justify-content: center;">
+    <a href="{{ url_for('campaigns.index') }}" class="btn" style="background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; text-decoration: none;">
+      <i class="fa-solid fa-arrow-left"></i> Edit Campaign
+    </a>
+    <button id="sendBtn" class="btn btn-primary" style="padding: 0.75rem 2rem; border-radius: 8px; font-weight: 600; border: none; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;" onclick="dispatchCampaign()">
+      <i class="fa-solid fa-paper-plane"></i> Dispatch Now
+    </button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  async function dispatchCampaign() {
+    const btn = document.getElementById('sendBtn');
+    const originalText = btn.innerHTML;
+    
+    // Prevent double clicking and show loading state
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Dispatching...';
+    btn.style.opacity = '0.7';
+
+    try {
+      const response = await fetch('/api/campaigns/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          title: "{{ campaign.title }}"
+        })
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        Swal.fire({
+          title: 'Campaign Dispatched!',
+          text: data.message,
+          icon: 'success',
+          confirmButtonColor: '#2563eb'
+        }).then(() => {
+          window.location.href = "{{ url_for('campaigns.index') }}";
+        });
+      } else {
+        throw new Error(data.message || 'Failed to dispatch');
+      }
+    } catch (error) {
+      Swal.fire({
+        title: 'Error',
+        text: error.message,
+        icon: 'error',
+        confirmButtonColor: '#2563eb'
+      });
+      // Reset button
+      btn.disabled = false;
+      btn.innerHTML = originalText;
+      btn.style.opacity = '1';
+    }
+  }
+</script>
+{% endblock %}
