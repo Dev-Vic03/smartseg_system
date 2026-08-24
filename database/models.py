@@ -18,6 +18,12 @@ class User(db.Model):
     role          = db.Column(db.String(20), default='Admin', nullable=False)
     mfa_secret    = db.Column(db.String(32), default=pyotp.random_base32)
     mfa_enabled   = db.Column(db.Boolean, default=False, nullable=False)
+    
+    # Email Verification
+    is_verified   = db.Column(db.Boolean, default=False, nullable=False)
+    verification_code = db.Column(db.String(6), nullable=True)
+    verification_code_expires_at = db.Column(db.DateTime, nullable=True)
+    
     created_at    = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Relationships with cascades

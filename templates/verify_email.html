@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SmartSeg - Verify Email</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <style>
+    /* Reset & Base */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      color: #0f172a;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    
+    .auth-container {
+      width: 100%;
+      max-width: 420px;
+      padding: 40px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .form-header { text-align: center; margin-bottom: 30px; }
+    .form-header h2 { font-size: 1.75rem; color: #1e293b; margin-bottom: 8px; font-weight: 700; }
+    .form-header p { font-size: 0.95rem; color: #64748b; }
+    .form-header strong { color: #2563eb; }
+    
+    .alert {
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      margin-bottom: 20px;
+    }
+    .alert-danger { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+    .alert-success { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+    .alert-info { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+
+    .form-group { margin-bottom: 20px; }
+    .form-control {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 1.25rem;
+      letter-spacing: 0.25rem;
+      text-align: center;
+      outline: none;
+      transition: all 0.2s ease;
+      background: #f8fafc;
+    }
+    .form-control:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      background: #fff;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 12px;
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    .btn-submit:hover { background: #1d4ed8; }
+    
+    .resend-link {
+      display: block;
+      text-align: center;
+      margin-top: 20px;
+      font-size: 0.9rem;
+      color: #64748b;
+    }
+    .resend-link a {
+      color: #2563eb;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .resend-link a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+  <div class="auth-container">
+    <div class="form-header">
+      <h2>Verify Your Email</h2>
+      <p>We've sent a 6-digit confirmation code to <br><strong>{{ email }}</strong></p>
+    </div>
+
+    <!-- Flask Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ 'danger' if category == 'error' else category }}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form action="{{ url_for('auth.verify_email') }}" method="POST">
+      <input type="hidden" name="email" value="{{ email }}">
+      
+      <div class="form-group">
+        <input type="text" name="code" class="form-control" placeholder="123456" maxlength="6" required autocomplete="off" autofocus>
+      </div>
+
+      <button type="submit" class="btn-submit">Verify Account</button>
+    </form>
+    
+    <div class="resend-link">
+      Didn't receive the code? <a href="{{ url_for('auth.resend_verification', email=email) }}">Resend it</a>
+    </div>
+    
+    <div class="resend-link" style="margin-top: 10px;">
+      <a href="{{ url_for('auth.login') }}" style="color: #64748b; font-weight: normal;"><i class="fa-solid fa-arrow-left"></i> Back to Login</a>
+    </div>
+  </div>
+
+</body>
+</html>
