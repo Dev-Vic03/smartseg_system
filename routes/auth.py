@@ -43,26 +43,27 @@ def send_verification_email(email, code):
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        name = request.form.get('fullname')
-        email = request.form.get('email')
-        password = request.form.get('password')
-        confirm_password = request.form.get('confirm_password')
-        business_name = request.form.get('business_name', '')
-        business_type = request.form.get('business_type', '')
-
-        if not all([name, email, password, confirm_password]):
-            flash('All required fields must be filled.', 'error')
-            return render_template('register.html')
-
-        if password != confirm_password:
-            flash('Passwords do not match.', 'error')
-            return render_template('register.html')
-
-        if User.query.filter_by(email=email).first():
-            flash('An account with this email already exists.', 'error')
-            return render_template('register.html')
-
         try:
+            name = request.form.get('fullname')
+            email = request.form.get('email')
+            password = request.form.get('password')
+            confirm_password = request.form.get('confirm_password')
+            business_name = request.form.get('business_name', '')
+            business_type = request.form.get('business_type', '')
+
+            if not all([name, email, password, confirm_password]):
+                flash('All required fields must be filled.', 'error')
+                return render_template('register.html')
+
+            if password != confirm_password:
+                flash('Passwords do not match.', 'error')
+                return render_template('register.html')
+
+            # This might throw an error if the users table is completely missing
+            if User.query.filter_by(email=email).first():
+                flash('An account with this email already exists.', 'error')
+                return render_template('register.html')
+
             verification_code = generate_verification_code()
             
             new_user = User(
@@ -88,9 +89,15 @@ def register():
                 flash('Account created successfully. We have sent a 6-digit code to your email.', 'success')
                 
             return redirect(url_for('auth.verify_email', email=email))
+
         except Exception as e:
             db.session.rollback()
-            flash(f"Registration Error: {str(e)}", 'error')
+            # If the database tables were manually dropped, recreate them instantly as a fallback
+            if 'users' in str(e).lower() and ('doesn\'t exist' in str(e).lower() or 'not found' in str(e).lower()):
+                db.create_all()
+                flash("Database automatically repaired. Please submit the form again.", 'info')
+            else:
+                flash(f"Registration Error: {str(e)}", 'error')
             return render_template('register.html')
             
     return render_template('register.html')
