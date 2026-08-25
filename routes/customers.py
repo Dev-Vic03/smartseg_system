@@ -31,8 +31,12 @@ def index():
     ).filter(Customer.user_id == user_id)
 
     if search_query:
-        if search_query.isdigit():
-            query = query.filter(Customer.id == int(search_query))
+        clean_id = search_query.replace('#', '').strip()
+        if clean_id.isdigit():
+            exact_customer = Customer.query.filter_by(id=int(clean_id), user_id=user_id).first()
+            if exact_customer:
+                return redirect(url_for('customers.profile', customer_id=exact_customer.id))
+            query = query.filter(Customer.id == int(clean_id))
         else:
             query = query.filter(
                 (Customer.name.ilike(f"%{search_query}%")) |

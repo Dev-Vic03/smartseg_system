@@ -44,60 +44,38 @@
     <a href="{{ url_for('campaigns.export_audience', campaign_id=campaign.id) }}" class="btn" style="background: #e0e7ff; color: #4338ca; border: 1px solid #c7d2fe; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; text-decoration: none;">
       <i class="fa-solid fa-file-export"></i> Export Audience CSV
     </a>
-    <button id="sendBtn" class="btn btn-primary" style="padding: 0.75rem 2rem; border-radius: 8px; font-weight: 600; border: none; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;" onclick="dispatchCampaign()">
-      <i class="fa-solid fa-paper-plane"></i> Dispatch Now
+    <button id="sendBtn" class="btn btn-primary" style="padding: 0.75rem 2rem; border-radius: 8px; font-weight: 600; border: none; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;" onclick="exportPDF()">
+      <i class="fa-solid fa-file-pdf"></i> Export Campaign (PDF)
     </button>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-  async function dispatchCampaign() {
-    const btn = document.getElementById('sendBtn');
-    const originalText = btn.innerHTML;
-    
-    // Prevent double clicking and show loading state
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Dispatching...';
-    btn.style.opacity = '0.7';
-
-    try {
-      const response = await fetch('/api/campaigns/send', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          title: "{{ campaign.title }}"
-        })
-      });
-
-      const data = await response.json();
-      
-      if (response.ok) {
-        Swal.fire({
-          title: 'Campaign Dispatched!',
-          text: data.message,
-          icon: 'success',
-          confirmButtonColor: '#2563eb'
-        }).then(() => {
-          window.location.href = "{{ url_for('campaigns.index') }}";
-        });
-      } else {
-        throw new Error(data.message || 'Failed to dispatch');
-      }
-    } catch (error) {
-      Swal.fire({
-        title: 'Error',
-        text: error.message,
-        icon: 'error',
-        confirmButtonColor: '#2563eb'
-      });
-      // Reset button
-      btn.disabled = false;
-      btn.innerHTML = originalText;
-      btn.style.opacity = '1';
-    }
+  function exportPDF() {
+    window.print();
   }
 </script>
+
+<style>
+  @media print {
+    body * {
+      visibility: hidden;
+    }
+    .panel, .panel * {
+      visibility: visible;
+    }
+    .panel {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      border: none;
+      box-shadow: none;
+    }
+    .btn {
+      display: none !important;
+    }
+  }
+</style>
 {% endblock %}
