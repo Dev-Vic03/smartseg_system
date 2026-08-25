@@ -62,27 +62,33 @@ def register():
             flash('An account with this email already exists.', 'error')
             return render_template('register.html')
 
-        verification_code = generate_verification_code()
-        
-        new_user = User(
-            name=name,
-            email=email,
-            password=generate_password_hash(password),
-            business_name=business_name,
-            business_type=business_type,
-            role='Admin',  # Default role for initial registrant
-            is_verified=False,
-            verification_code=verification_code,
-            verification_code_expires_at=datetime.utcnow() + timedelta(minutes=10)
-        )
-        db.session.add(new_user)
-        db.session.commit()
+        try:
+            verification_code = generate_verification_code()
+            
+            new_user = User(
+                name=name,
+                email=email,
+                password=generate_password_hash(password),
+                business_name=business_name,
+                business_type=business_type,
+                role='Admin',  # Default role for initial registrant
+                is_verified=False,
+                verification_code=verification_code,
+                verification_code_expires_at=datetime.utcnow() + timedelta(minutes=10)
+            )
+            db.session.add(new_user)
+            db.session.commit()
 
-        # Send Email
-        send_verification_email(email, verification_code)
+            # Send Email
+            send_verification_email(email, verification_code)
 
-        flash('Account created successfully. We have sent a 6-digit code to your email.', 'success')
-        return redirect(url_for('auth.verify_email', email=email))
+            flash('Account created successfully. We have sent a 6-digit code to your email.', 'success')
+            return redirect(url_for('auth.verify_email', email=email))
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Registration Error: {str(e)}", 'error')
+            return render_template('register.html')
+            
     return render_template('register.html')
 
 @auth_bp.route('/verify-email', methods=['GET', 'POST'])
