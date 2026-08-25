@@ -34,26 +34,41 @@ def create_app():
     app.register_blueprint(reports_bp)
     app.register_blueprint(settings_bp)
 
-    # Auto-migrate database on boot (Handles adding new columns safely)
+    # Auto-migrate database on boot
     with app.app_context():
-        # First ensure all base tables exist (like campaigns, workspace_settings, etc.)
+        # First ensure all base tables exist
         db.create_all()
         
+        from sqlalchemy import inspect
         from sqlalchemy import text
         
-        queries = [
-            "ALTER TABLE users ADD COLUMN is_verified BOOLEAN DEFAULT FALSE NOT NULL",
-            "UPDATE users SET is_verified = TRUE",
-            "ALTER TABLE users ADD COLUMN verification_code VARCHAR(6)",
-            "ALTER TABLE users ADD COLUMN verification_code_expires_at DATETIME"
-        ]
-        
-        with db.engine.begin() as conn:
-            for q in queries:
-                try:
-                    conn.execute(text(q))
-                except Exception:
-                    pass
+        inspector = inspect(db.engine)
+        if inspector.has_table('users'):
+            columns = [col['name'] for col in inspector.get_columns('users')]
+            
+            with db.engine.connect().execution_options(isolation_level="AUTOCOMMIT") as conn:
+                if 'is_verified' not in columns:
+                    try:
+                        conn.execute(text("ALTER TABLE users ADD COLUMN is_verified BOOLEAN DEFAULT FALSE"))
+                        conn.execute(text("UPDATE users SET is_verified = TRUE"))
+                    except:
+                        pass
+                
+                if 'verification_code' not in columns:
+                    try:
+                        conn.execute(text("ALTER TABLE users ADD COLUMN verification_code VARCHAR(6)"))
+                    except:
+                        pass
+                        
+                if 'verification_code_expires_at' not in columns:
+                    try:
+                        conn.execute(text("ALTER TABLE users ADD COLUMN verification_code_expires_at DATETIME"))
+                    except:
+                        try:
+                            conn.execute(text("ALTER TABLE users ADD COLUMN verification_code_expires_at TIMESTAMP"))
+                        except:
+                            pass
+                            
         app.logger.info("Database migration check completed.")
 
     @app.get('/ping')
