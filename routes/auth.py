@@ -80,9 +80,13 @@ def register():
             db.session.commit()
 
             # Send Email
-            send_verification_email(email, verification_code)
+            email_sent = send_verification_email(email, verification_code)
 
-            flash('Account created successfully. We have sent a 6-digit code to your email.', 'success')
+            if not email_sent:
+                flash(f'⚠️ DEMO MODE: Email server unavailable. Your verification code is: {verification_code}', 'info')
+            else:
+                flash('Account created successfully. We have sent a 6-digit code to your email.', 'success')
+                
             return redirect(url_for('auth.verify_email', email=email))
         except Exception as e:
             db.session.rollback()
@@ -154,8 +158,12 @@ def resend_verification():
     user.verification_code_expires_at = datetime.utcnow() + timedelta(minutes=10)
     db.session.commit()
     
-    send_verification_email(user.email, code)
-    flash('A new verification code has been sent to your email.', 'success')
+    email_sent = send_verification_email(user.email, code)
+    if not email_sent:
+        flash(f'⚠️ DEMO MODE: Email server unavailable. Your NEW verification code is: {code}', 'info')
+    else:
+        flash('A new verification code has been sent to your email.', 'success')
+        
     return redirect(url_for('auth.verify_email', email=email))
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
@@ -174,8 +182,11 @@ def login():
                     user.verification_code = code
                     user.verification_code_expires_at = datetime.utcnow() + timedelta(minutes=10)
                     db.session.commit()
-                    send_verification_email(user.email, code)
-                    flash('A new verification code was sent to your email.', 'info')
+                    email_sent = send_verification_email(user.email, code)
+                    if not email_sent:
+                        flash(f'⚠️ DEMO MODE: Email server unavailable. Your NEW verification code is: {code}', 'info')
+                    else:
+                        flash('A new verification code was sent to your email.', 'info')
                 return redirect(url_for('auth.verify_email', email=email))
 
             # If Multi-Factor Authentication is enabled on this account
