@@ -64,31 +64,29 @@ def register():
                 flash('An account with this email already exists.', 'error')
                 return render_template('register.html')
 
-            verification_code = generate_verification_code()
-            
             new_user = User(
                 name=name,
                 email=email,
                 password=generate_password_hash(password),
                 business_name=business_name,
                 business_type=business_type,
-                role='Admin',  # Default role for initial registrant
-                is_verified=False,
-                verification_code=verification_code,
-                verification_code_expires_at=datetime.utcnow() + timedelta(minutes=10)
+                role='Admin',  
+                is_verified=True,  # Verification bypassed
+                verification_code=None,
+                verification_code_expires_at=None
             )
             db.session.add(new_user)
             db.session.commit()
 
-            # Send Email
-            email_sent = send_verification_email(email, verification_code)
+            # Bypass email sending and instantly log the user in
+            session.clear()
+            session['user_id'] = new_user.id
+            session['user_name'] = new_user.name
+            session['user_role'] = new_user.role
+            session['fresh_login'] = True
 
-            if not email_sent:
-                flash(f'⚠️ DEMO MODE: Email server unavailable. Your verification code is: {verification_code}', 'info')
-            else:
-                flash('Account created successfully. We have sent a 6-digit code to your email.', 'success')
-                
-            return redirect(url_for('auth.verify_email', email=email))
+            flash('Account created successfully. Welcome to SmartSeg!', 'success')
+            return redirect(url_for('dashboard'))
 
         except Exception as e:
             db.session.rollback()
@@ -180,22 +178,6 @@ def login():
         password = request.form.get('password')
         user = User.query.filter_by(email=email).first()
         if user and check_password_hash(user.password, password):
-            # Check Verification
-            if not user.is_verified:
-                flash('Please verify your email before logging in.', 'error')
-                # Optional: Send a new code automatically here if expired
-                if not user.verification_code or (user.verification_code_expires_at and datetime.utcnow() > user.verification_code_expires_at):
-                    code = generate_verification_code()
-                    user.verification_code = code
-                    user.verification_code_expires_at = datetime.utcnow() + timedelta(minutes=10)
-                    db.session.commit()
-                    email_sent = send_verification_email(user.email, code)
-                    if not email_sent:
-                        flash(f'⚠️ DEMO MODE: Email server unavailable. Your NEW verification code is: {code}', 'info')
-                    else:
-                        flash('A new verification code was sent to your email.', 'info')
-                return redirect(url_for('auth.verify_email', email=email))
-
             # If Multi-Factor Authentication is enabled on this account
             if user.mfa_enabled:
                 session.clear()
