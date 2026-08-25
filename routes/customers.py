@@ -23,17 +23,25 @@ customers_bp = Blueprint('customers', __name__, url_prefix='/customers')
 @login_required
 def index():
     user_id = session['user_id']
-    search_query = request.args.get('q', '').strip()
+    search_query = request.args.get('search', '').strip()
+    segment_filter = request.args.get('segment', '').strip()
     
     query = db.session.query(Customer, Segment).outerjoin(
         Segment, Customer.id == Segment.customer_id
     ).filter(Customer.user_id == user_id)
 
     if search_query:
-        query = query.filter(
-            (Customer.name.ilike(f"%{search_query}%")) |
-            (Customer.email.ilike(f"%{search_query}%"))
-        )
+        if search_query.isdigit():
+            query = query.filter(Customer.id == int(search_query))
+        else:
+            query = query.filter(
+                (Customer.name.ilike(f"%{search_query}%")) |
+                (Customer.email.ilike(f"%{search_query}%")) |
+                (Customer.location.ilike(f"%{search_query}%"))
+            )
+            
+    if segment_filter:
+        query = query.filter(Segment.segment_name.ilike(f"%{segment_filter}%"))
 
     # Sorted by ID descending to avoid missing created_at column errors
     records = query.order_by(Customer.id.desc()).all()
@@ -52,7 +60,7 @@ def index():
             'segment': seg.segment_name if seg else 'Unassigned'
         })
 
-    return render_template('customers.html', customers=formatted_customers, search_query=search_query)
+    return render_template('customers.html', customers=formatted_customers, search_query=search_query, segment_filter=segment_filter)
 
 
 @customers_bp.route('/<int:customer_id>', methods=['GET'])

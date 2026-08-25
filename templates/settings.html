@@ -4,24 +4,116 @@
 {% block header_subtitle %}Manage API credentials and system preferences{% endblock %}
 
 {% block content %}
-<div class="panel glass-panel">
-  <div class="panel-header">
-    <h3 class="panel-title"><i class="fa-solid fa-key"></i> System API Key</h3>
-  </div>
-  <div class="styled-form">
-    <div class="field">
-      <label>Active API Credentials Key</label>
-      <input type="text" class="form-control" id="apiKeyVal" value="{{ setting.api_key }}" readonly>
+<div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem; align-items: start;">
+  
+  <!-- Left Column: Navigation / Simple Profile -->
+  <div class="panel glass-panel">
+    <div style="text-align: center; margin-bottom: 1.5rem;">
+      <div style="background: #e0e7ff; color: #4338ca; width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 1rem auto;">
+        <i class="fa-solid fa-building"></i>
+      </div>
+      <h3 style="font-size: 1.1rem; font-weight: 700; color: #1e293b;">Workspace Profile</h3>
+      <p style="color: #64748b; font-size: 0.85rem;">Manage your business details</p>
     </div>
-    <button class="btn btn-accent" onclick="regenKey()"><i class="fa-solid fa-rotate"></i> Regenerate API Key</button>
+
+    <form class="styled-form">
+      <div class="field" style="margin-bottom: 1rem;">
+        <label>Business Name</label>
+        <input type="text" class="form-control" value="My Business" disabled>
+      </div>
+      <div class="field" style="margin-bottom: 1rem;">
+        <label>Contact Email</label>
+        <input type="email" class="form-control" value="admin@business.com" disabled>
+      </div>
+      <button type="button" class="btn btn-secondary" style="width: 100%;" disabled>Update Profile (Coming Soon)</button>
+    </form>
+  </div>
+
+  <!-- Right Column: API & Advanced Settings -->
+  <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+    
+    <div class="panel glass-panel">
+      <div class="panel-header" style="margin-bottom: 1rem;">
+        <h3 class="panel-title"><i class="fa-solid fa-key" style="color: #10b981;"></i> System API Key</h3>
+      </div>
+      
+      <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 1rem; line-height: 1.5;">
+        Your API key allows you to securely connect SmartSeg to external tools (like Zapier, custom CRM software, or your own backend). 
+        <strong>Keep this key secret.</strong> If your key is compromised, generate a new one immediately.
+      </p>
+
+      <div class="styled-form">
+        <div class="field" style="margin-bottom: 1rem;">
+          <label>Active API Credentials Key</label>
+          <div style="display: flex; gap: 10px;">
+            <input type="text" class="form-control" id="apiKeyVal" value="{{ setting.api_key }}" readonly style="flex: 1; font-family: monospace; letter-spacing: 1px; color: #374151;">
+            <button type="button" class="btn" style="background: #f1f5f9; border: 1px solid #cbd5e1;" onclick="copyApiKey()">
+              <i class="fa-solid fa-copy"></i> Copy
+            </button>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="regenKey()"><i class="fa-solid fa-rotate"></i> Generate New API Key</button>
+      </div>
+    </div>
+
+    <div class="panel glass-panel">
+      <div class="panel-header" style="margin-bottom: 1rem;">
+        <h3 class="panel-title"><i class="fa-solid fa-bell" style="color: #f59e0b;"></i> Notification Preferences</h3>
+      </div>
+      
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9;">
+        <div>
+          <div style="font-weight: 600; color: #1e293b; font-size: 0.9rem;">Weekly Analytics Report</div>
+          <div style="font-size: 0.8rem; color: #64748b;">Receive an automated email summary of segment shifts.</div>
+        </div>
+        <input type="checkbox" checked disabled>
+      </div>
+      
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0;">
+        <div>
+          <div style="font-weight: 600; color: #1e293b; font-size: 0.9rem;">Churn Alerts</div>
+          <div style="font-size: 0.8rem; color: #64748b;">Get notified instantly when VIP customers become At-Risk.</div>
+        </div>
+        <input type="checkbox" checked disabled>
+      </div>
+    </div>
+
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 async function regenKey() {
-  const res = await fetch('/api/settings/generate-key', { method: 'POST' });
-  const data = await res.json();
-  document.getElementById('apiKeyVal').value = data.api_key;
+  Swal.fire({
+    title: 'Generate New Key?',
+    text: "Your old API key will stop working immediately. Are you sure?",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#2563eb',
+    cancelButtonColor: '#ef4444',
+    confirmButtonText: 'Yes, generate it!'
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      const res = await fetch('/api/settings/generate-key', { method: 'POST' });
+      const data = await res.json();
+      document.getElementById('apiKeyVal').value = data.api_key;
+      Swal.fire('Generated!', 'Your new API key is active.', 'success');
+    }
+  });
+}
+
+function copyApiKey() {
+  const apiKey = document.getElementById('apiKeyVal');
+  apiKey.select();
+  apiKey.setSelectionRange(0, 99999);
+  document.execCommand("copy");
+  Swal.fire({
+    title: 'Copied!',
+    text: 'API Key copied to clipboard.',
+    icon: 'success',
+    timer: 1500,
+    showConfirmButton: false
+  });
 }
 </script>
 {% endblock %}

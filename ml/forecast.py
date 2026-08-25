@@ -32,7 +32,7 @@ def project_segment_revenue(user_id):
     30-day historical sales velocity instead of a fixed multiplier.
     """
     segments = ['VIP Customer', 'Loyal Customer', 'Regular Customer', 'At-Risk Customer']
-    projections = {}
+    projections = []
 
     thirty_days_ago = datetime.utcnow() - timedelta(days=30)
 
@@ -60,11 +60,16 @@ def project_segment_revenue(user_id):
 
         # Dynamic growth rate: segment baseline + recent velocity adjustment
         estimated_next_month = total_monetary + recent_sales
+        growth_pct = 0
+        if total_monetary > 0:
+            growth_pct = round(((estimated_next_month - total_monetary) / total_monetary) * 100, 1)
 
-        projections[seg_name] = {
+        projections.append({
+            'segment_name': seg_name,
             'count': count,
             'current_revenue': round(total_monetary, 2),
-            'projected_revenue': round(estimated_next_month, 2)
-        }
+            'projected_revenue': round(estimated_next_month, 2),
+            'growth_pct': growth_pct
+        })
 
     return projections

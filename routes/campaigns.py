@@ -53,6 +53,35 @@ def summary(campaign_id):
     
     return render_template('campaign_summary.html', campaign=campaign, audience_count=audience_count)
 
+@campaigns_bp.route('/campaigns/<int:campaign_id>/export_audience')
+@login_required
+def export_audience(campaign_id):
+    import io
+    import csv
+    from flask import Response
+    
+    user_id = session['user_id']
+    campaign = Campaign.query.filter_by(id=campaign_id, user_id=user_id).first_or_404()
+    
+    from database.models import Customer, Segment
+    audience = Customer.query.join(Segment, Customer.id == Segment.customer_id).filter(
+        Customer.user_id == user_id, 
+        Segment.segment_name == campaign.segment_name
+    ).all()
+    
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['Customer ID', 'Name', 'Email'])
+    
+    for customer in audience:
+        writer.writerow([customer.id, customer.name, customer.email])
+        
+    return Response(
+        output.getvalue(),
+        mimetype="text/csv",
+        headers={"Content-disposition": f"attachment; filename=audience_{campaign_id}.csv"}
+    )
+
 @campaigns_bp.route('/api/campaigns/send', methods=['POST'])
 @login_required
 def send_campaign():

@@ -50,7 +50,7 @@
       </div>
     </div>
 
-    <form id="campaignForm" method="POST" action="{{ url_for('campaigns.create') if 'campaigns.create' in config else '#' }}" class="styled-form">
+    <form id="campaignForm" method="POST" action="{{ url_for('campaigns.create') }}" class="styled-form">
       <div style="margin-bottom: 1rem;">
         <label style="font-size: 0.85rem; font-weight: 600; margin-bottom: 0.3rem; display: block;">Campaign Name</label>
         <input type="text" id="campaignName" name="name" class="form-control" placeholder="e.g. VIP Loyalty Appreciation Month" required>
@@ -112,6 +112,15 @@
           <p style="font-size: 0.8rem; color: #64748b; margin: 0;">Encourage repeat orders with tailored product bundle discounts.</p>
         </div>
         <button type="button" class="btn-pill-action" onclick="applyPlaybook('Loyal Member Rewards Bundle', 'Loyal Customer', 'Thank you for choosing us continuously! Enjoy double reward points on all bundle orders this week.')">Use</button>
+      </div>
+
+      <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.85rem 1rem; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <span style="background: #f1f5f9; color: #475569; font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;">REGULAR</span>
+          <h4 style="font-size: 0.95rem; font-weight: 600; margin: 0.3rem 0 0 0;">Flash Sale Preview</h4>
+          <p style="font-size: 0.8rem; color: #64748b; margin: 0;">Push standard customers to increase purchase frequency.</p>
+        </div>
+        <button type="button" class="btn-pill-action" onclick="applyPlaybook('24-Hour Flash Sale Preview', 'Regular Customer', 'Hi there! We are running a 24-hour flash sale tomorrow. Here is a sneak peek at the items going on discount.')">Use</button>
       </div>
     </div>
   </div>

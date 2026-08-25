@@ -5,9 +5,9 @@
 {% block header_subtitle %}Segment-level projections based on current data{% endblock %}
 
 {% block content %}
-<div class="grid-2">
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
   <div class="panel">
-    <h3 class="panel-title">Customers At Risk of Churning</h3>
+    <h3 class="panel-title"><i class="fa-solid fa-triangle-exclamation" style="color: #ef4444;"></i> At-Risk Churn Alerts</h3>
     {% if at_risk_customers %}
     <ul class="info-list">
       {% for c in at_risk_customers %}
@@ -21,8 +21,32 @@
     <p style="color:#6B7280;">No at-risk customers flagged yet.</p>
     {% endif %}
   </div>
-
   <div class="panel">
+    <h3 class="panel-title" style="margin-bottom: 1rem;"><i class="fa-solid fa-arrow-trend-up" style="color: #10b981;"></i> Growth Opportunities</h3>
+    <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 1rem;">Segments with highest projected revenue growth based on 30-day velocity</p>
+    {% set has_growth = false %}
+    <ul class="info-list">
+      {% for p in projections %}
+        {% if p.growth_pct > 0 %}
+          {% set has_growth = true %}
+          <li style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9;">
+            <span>
+              <span class="segment-badge" style="background:#dbeafe; color:#1e40af;">{{ p.segment_name }}</span>
+            </span>
+            <div style="text-align: right;">
+              <div style="font-weight: 700; color: #10b981;">+{{ p.growth_pct }}%</div>
+              <div style="font-size: 0.75rem; color: #64748b;">${{ p.projected_revenue }} proj.</div>
+            </div>
+          </li>
+        {% endif %}
+      {% endfor %}
+    </ul>
+    {% if not has_growth %}
+    <p style="color:#6B7280; padding: 10px 0;">No active growth signals detected recently.</p>
+    {% endif %}
+  </div>
+
+  <div class="panel" style="grid-column: 1 / -1;">
     <h3 class="panel-title">Projected Segment Revenue</h3>
     <div id="revenueChart"></div>
   </div>
@@ -39,8 +63,8 @@
       '<p style="color:#6B7280; text-align:center; padding: 60px 0;">No segment data yet to project revenue from.</p>';
   } else {
     const revenueData = [
-      { x: projections.map(p => p.segment_name), y: projections.map(p => p.current_total), name: 'Current', type: 'bar', marker: { color: '#4F7CFF' } },
-      { x: projections.map(p => p.segment_name), y: projections.map(p => p.projected_next_period), name: 'Projected', type: 'bar', marker: { color: '#E8A94C' } }
+      { x: projections.map(p => p.segment_name), y: projections.map(p => p.current_revenue), name: 'Current', type: 'bar', marker: { color: '#6366F1' } },
+      { x: projections.map(p => p.segment_name), y: projections.map(p => p.projected_revenue), name: 'Projected', type: 'bar', marker: { color: '#3B82F6' } }
     ];
     Plotly.newPlot('revenueChart', revenueData, {
       barmode: 'group', height: 320, margin: { t: 10 }, font: { family: 'Inter, sans-serif' }
