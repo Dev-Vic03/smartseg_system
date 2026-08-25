@@ -36,6 +36,9 @@ def create_app():
 
     # Auto-migrate database on boot (Handles adding new columns safely)
     with app.app_context():
+        # First ensure all base tables exist (like campaigns, workspace_settings, etc.)
+        db.create_all()
+        
         from sqlalchemy import text
         
         queries = [

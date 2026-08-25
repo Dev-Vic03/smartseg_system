@@ -5,16 +5,22 @@
 
 {% block content %}
 <div class="panel glass-panel">
-  <form method="GET" action="{{ url_for('customers.index') }}" class="styled-form form-row">
-    <input type="text" name="search" value="{{ search_query }}" placeholder="Search customer name, email, or location..." class="form-control">
-    <select name="segment" class="form-control">
-      <option value="">All Segments</option>
-      <option value="VIP" {% if segment_filter == 'VIP' %}selected{% endif %}>VIP</option>
-      <option value="Loyal" {% if segment_filter == 'Loyal' %}selected{% endif %}>Loyal</option>
-      <option value="Regular" {% if segment_filter == 'Regular' %}selected{% endif %}>Regular</option>
-      <option value="At-Risk" {% if segment_filter == 'At-Risk' %}selected{% endif %}>At-Risk</option>
-    </select>
-    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-magnifying-glass"></i> Filter</button>
+  <form method="GET" action="{{ url_for('customers.index') }}" class="styled-form form-row" style="align-items: flex-end;">
+    <div style="flex: 2;">
+      <label style="font-size: 0.8rem; font-weight: 600; color: #64748b; margin-bottom: 0.3rem; display: block;">Search</label>
+      <input type="text" name="search" value="{{ search_query }}" placeholder="Search by Customer ID, Name, Email..." class="form-control" style="width: 100%;">
+    </div>
+    <div style="flex: 1;">
+      <label style="font-size: 0.8rem; font-weight: 600; color: #64748b; margin-bottom: 0.3rem; display: block;">Segment</label>
+      <select name="segment" class="form-control" style="width: 100%;">
+        <option value="">All Segments</option>
+        <option value="VIP" {% if segment_filter == 'VIP' %}selected{% endif %}>VIP</option>
+        <option value="Loyal" {% if segment_filter == 'Loyal' %}selected{% endif %}>Loyal</option>
+        <option value="Regular" {% if segment_filter == 'Regular' %}selected{% endif %}>Regular</option>
+        <option value="At-Risk" {% if segment_filter == 'At-Risk' %}selected{% endif %}>At-Risk</option>
+      </select>
+    </div>
+    <button type="submit" class="btn btn-primary" style="padding: 0.65rem 1.5rem; height: auto;"><i class="fa-solid fa-magnifying-glass"></i> Filter</button>
   </form>
 </div>
 
