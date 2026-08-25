@@ -32,8 +32,16 @@
     </div>
     
     <div>
-      <div style="font-size: 0.8rem; color: #64748b; font-weight: 600; text-transform: uppercase; margin-bottom: 0.5rem;">Message Preview</div>
+      <div style="font-size: 0.8rem; color: #64748b; font-weight: 600; text-transform: uppercase; margin-bottom: 0.5rem;">Email Message Preview</div>
       <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 1rem; color: #334155; font-size: 0.95rem; line-height: 1.6; white-space: pre-wrap;">{{ campaign.body_template }}</div>
+    </div>
+    
+    <div style="margin-top: 1.5rem;">
+      <div style="font-size: 0.8rem; color: #64748b; font-weight: 600; text-transform: uppercase; margin-bottom: 0.5rem;">Social Media / SMS Ready Text (Click to Copy)</div>
+      <div id="readyText" style="background: #f0fdf4; border: 1px dashed #86efac; border-radius: 8px; padding: 1rem; color: #166534; font-size: 0.95rem; line-height: 1.6; position: relative; cursor: pointer;" onclick="navigator.clipboard.writeText(this.innerText.replace('Copy', '').trim()); Swal.fire({toast: true, position: 'top-end', icon: 'success', title: 'Copied to clipboard!', showConfirmButton: false, timer: 1500})">
+        Hey friends! 👋 {{ campaign.body_template | replace('{name}', '') }} Tap the link in our bio to grab yours before they're gone! ✨🛍️ #SmartSeg #Exclusive #ShopNow
+        <span style="position: absolute; right: 10px; top: 10px; background: #dcfce7; border: 1px solid #bbf7d0; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; color: #166534;"><i class="fa-regular fa-copy"></i> Copy</span>
+      </div>
     </div>
   </div>
 

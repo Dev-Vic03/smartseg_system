@@ -340,7 +340,7 @@ def create_app():
             return render_template(
                 'forecast.html',
                 at_risk_customers=[],
-                projections={'vip': 0, 'loyal': 0, 'regular': 0, 'at_risk': 0}
+                projections=[]
             )
 
         return render_template(

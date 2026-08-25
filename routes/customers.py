@@ -5,9 +5,6 @@ from flask import Blueprint, render_template, request, redirect, url_for, sessio
 from database.models import db, Customer, Sale, Segment
 from utils.decorators import login_required, admin_required
 
-from flask import Blueprint, render_template, request, session, jsonify, flash, redirect, url_for
-from database.models import db, Customer, Segment
-from utils.decorators import login_required
 
 customers_bp = Blueprint('customers', __name__, url_prefix='/customers')
 

@@ -9,14 +9,17 @@ campaigns_bp = Blueprint('campaigns', __name__)
 def index():
     user_id = session['user_id']
     user_campaigns = Campaign.query.filter_by(user_id=user_id).all()
-    
+    from database.models import Customer
+    active_count = len(user_campaigns)
+    total_audience = Customer.query.filter_by(user_id=user_id).count()
+
     default_templates = {
         'At-Risk': {'subject': 'We miss you! Here is 20% off', 'body': 'Hi {name}, come back and get 20% off your next purchase with code WE_MISS_YOU.'},
         'VIP': {'subject': 'Exclusive VIP Access Inside', 'body': 'Hi {name}, as a valued VIP, enjoy early access to our newest collection.'},
         'Loyal': {'subject': 'Thank you for being with us', 'body': 'Hi {name}, we appreciate your loyalty! Enjoy double points on your next order.'},
         'Regular': {'subject': 'Discover popular arrivals', 'body': 'Hi {name}, check out our trending items curated for you this week.'}
     }
-    return render_template('campaigns.html', campaigns=user_campaigns, templates=default_templates)
+    return render_template('campaigns.html', campaigns=user_campaigns, templates=default_templates, active_count=active_count, total_audience=total_audience)
 
 @campaigns_bp.route('/campaigns/create', methods=['POST'])
 @login_required
